@@ -1,0 +1,14 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Basic background gradient similar to SwiftUI design */
+.bg-gradient {
+  background: linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 45%, rgba(224,231,255,0.3) 100%);
+}
+.card {
+  background: rgba(255,255,255,0.8);
+  border-radius: 1rem;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+}
