@@ -1,22 +1,37 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import './styles.css'
-import StudentProfileView from './components/StudentProfileView'
-import StudentSettingsView from './components/StudentSettingsView'
+import LoginView from './components/LoginView'
+import StudentApp from './components/StudentDashboardView'
+import ParentApp from './components/parentsALL'
 
 function App() {
-  const [page, setPage] = React.useState('profile')
-  return (
-    <div className="min-h-screen bg-gradient p-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex gap-4 mb-6">
-          <button className="px-4 py-2 bg-indigo-600 text-white rounded" onClick={() => setPage('profile')}>Student Profile</button>
-          <button className="px-4 py-2 bg-indigo-500 text-white rounded" onClick={() => setPage('settings')}>Student Settings</button>
-        </div>
-        {page === 'profile' ? <StudentProfileView /> : <StudentSettingsView />}
-      </div>
-    </div>
-  )
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [userType, setUserType] = useState(null) // 'student' or 'parent'
+
+  const handleLogin = (type) => {
+    setUserType(type)
+    setIsLoggedIn(true)
+  }
+
+  const handleLogout = () => {
+    setIsLoggedIn(false)
+    setUserType(null)
+  }
+
+  // 显示登录页面
+  if (!isLoggedIn) {
+    return <LoginView onLogin={handleLogin} />
+  }
+
+  // 根据用户类型显示对应的应用
+  if (userType === 'student') {
+    return <StudentApp onLogout={handleLogout} />
+  } else if (userType === 'parent') {
+    return <ParentApp onLogout={handleLogout} />
+  }
+
+  return null
 }
 
 createRoot(document.getElementById('root')).render(<App />)

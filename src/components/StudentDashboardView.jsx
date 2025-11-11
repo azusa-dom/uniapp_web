@@ -1,10 +1,2274 @@
-import React from 'react'
+import React, { useState, useEffect, useRef, createContext, useContext } from 'react';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { 
+  Home, 
+  BookOpen, 
+  Calendar, 
+  Heart, 
+  BrainCircuit, 
+  Mail, 
+  User, 
+  Settings, 
+  Plus, 
+  ChevronRight, 
+  Search, 
+  CheckCircle, 
+  XCircle, 
+  Clock, 
+  MapPin, 
+  Users, 
+  BookMarked, 
+  Info,
+  Check,
+  ChevronLeft,
+  ArrowUpRight,
+  ArrowDownRight,
+  ArrowRight,
+  BedDouble,
+  HeartPulse,
+  Footprints,
+  FileText,
+  ClipboardList,
+  CalendarPlus,
+  Bell,
+  Pill,
+  Send,
+  ArrowUp,
+  MessageCircle,
+  Sparkles,
+  List,
+  Flag,
+  Calendar as CalendarIcon,
+  X,
+  ChevronDown,
+  ChevronUp,
+  FileCheck,
+  BarChart2,
+  AlertTriangle,
+  Star,
+  GraduationCap,
+  Eye // Added Eye icon
+} from 'lucide-react';
 
-export default function StudentDashboardView() {
-  return (
-    <div className="card p-6 rounded-xl">
-      <h3 className="text-lg font-bold">StudentDashboardView (placeholder)</h3>
-      <p className="text-sm text-gray-600 mt-2">This component is a placeholder converted from the original SwiftUI file. You'll send the rest of the files and I will replace placeholders with full conversions preserving your UI exactly.</p>
+// --- Mock Data ---
+// Extracted from Swift ViewModels and DataManagers
+
+// From StudentDashboardView
+const mockTodayClasses = [
+    {
+        id: 1,
+        name: "数据科学与统计",
+        code: "CHME0007",
+        time: "14:00 - 16:00",
+        location: "Cruciform Building, Room 4.18",
+        lecturer: "Dr. Johnson"
+    },
+    {
+        id: 2,
+        name: "健康数据科学原理",
+        code: "CHME0006",
+        time: "16:30 - 18:30",
+        location: "Foster Court, Lecture Theatre",
+        lecturer: "Prof. Smith"
+    }
+];
+
+const mockUpcomingDeadlines = [
+    {
+        id: "todo-1",
+        title: "CS Assignment",
+        category: "作业",
+        dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
+        priority: "high",
+        isCompleted: false,
+    },
+    {
+        id: "todo-2",
+        title: "数据科学论文",
+        category: "论文",
+        dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
+        priority: "medium",
+        isCompleted: false,
+    },
+];
+
+// From StudentAcademicsView
+const mockModules = [
+    {
+        id: "m1",
+        name: "数据方法与健康研究",
+        code: "CHME0013",
+        mark: 87,
+        moduleAverage: 65,
+        assignments: 90,
+        participation: 95,
+        midterm: 85,
+        final: 86,
+        assignmentList: [
+            { id: "a1", name: "数据分析作业", grade: 90, submitted: true, dueDate: "11月1日" },
+            { id: "a2", name: "Python 项目", grade: 88, submitted: true, dueDate: "10月20日" },
+            { id: "a3", name: "统计习题集", grade: 0, submitted: false, dueDate: "11月8日" },
+            { id: "a4", name: "研究设计报告", grade: 0, submitted: false, dueDate: "11月20日" },
+        ],
+        gradeBreakdown: [
+            { component: "作业", weight: 40, grade: 90 },
+            { component: "课堂参与", weight: 10, grade: 95 },
+            { component: "期中考试", weight: 25, grade: 85 },
+            { component: "期末考试", weight: 25, grade: 86 },
+        ]
+    },
+    {
+        id: "m2",
+        name: "数据科学与统计",
+        code: "CHME0007",
+        mark: 72,
+        moduleAverage: 68,
+        assignments: 75,
+        participation: 80,
+        midterm: 68,
+        final: 70,
+        assignmentList: [
+            { id: "a5", name: "回归分析", grade: 75, submitted: true, dueDate: "10月15日" },
+            { id: "a6", name: "统计建模", grade: 0, submitted: false, dueDate: "11月10日" },
+        ],
+        gradeBreakdown: [
+            { component: "作业", weight: 40, grade: 75 },
+            { component: "课堂参与", weight: 10, grade: 80 },
+            { component: "期中考试", weight: 25, grade: 68 },
+            { component: "期末考试", weight: 25, grade: 70 },
+        ]
+    },
+    {
+        id: "m3",
+        name: "健康数据科学原理",
+        code: "CHME0006",
+        mark: 67,
+        moduleAverage: 62,
+        assignments: 70,
+        participation: 75,
+        midterm: 62,
+        final: 65,
+        assignmentList: [
+            { id: "a7", name: "文献综述作业", grade: 76, submitted: true, dueDate: "10月30日" },
+        ],
+        gradeBreakdown: [
+            { component: "作业", weight: 40, grade: 70 },
+            { component: "课堂参与", weight: 10, grade: 75 },
+            { component: "期中考试", weight: 25, grade: 62 },
+            { component: "期末考试", weight: 25, grade: 65 },
+        ]
+    },
+    {
+        id: "m4",
+        name: "深度学习应用",
+        code: "CHME0022",
+        mark: 88,
+        moduleAverage: 75,
+        assignments: 92,
+        participation: 85,
+        midterm: 86,
+        final: 0, // 期末考试未进行
+        assignmentList: [
+            { id: "a8", name: "神经网络基础", grade: 95, submitted: true, dueDate: "10月25日" },
+            { id: "a9", name: "CNN 图像分类", grade: 89, submitted: true, dueDate: "11月5日" },
+            { id: "a10", name: "神经网络项目", grade: 0, submitted: false, dueDate: "11月25日" },
+        ],
+        gradeBreakdown: [
+            { component: "作业", weight: 40, grade: 92 },
+            { component: "课堂参与", weight: 10, grade: 85 },
+            { component: "期中考试", weight: 25, grade: 86 },
+            { component: "期末考试", weight: 25, grade: 0 },
+        ]
+    },
+];
+
+const mockSchedule = [
+    { id: "s1", dayOfWeek: "周一", courseName: "数据方法与健康研究", courseCode: "CHME0013", time: "10:00 - 12:00", location: "Cruciform Building B.3.05", color: "bg-[#6366F1]" },
+    { id: "s2", dayOfWeek: "周二", courseName: "数据科学与统计", courseCode: "CHME0007", time: "14:00 - 16:00", location: "Foster Court 114", color: "bg-[#8B5CF6]" },
+    { id: "s3", dayOfWeek: "周三", courseName: "Python 健康研究编程", courseCode: "CHME0011", time: "09:00 - 11:00", location: "Roberts Building G06", color: "bg-[#10B981]" },
+    { id: "s4", dayOfWeek: "周四", courseName: "医疗人工智能", courseCode: "CHME0016", time: "13:00 - 15:00", location: "Cruciform Building B.4.01", color: "bg-[#EF4444]" },
+    { id: "s5", dayOfWeek: "周五", courseName: "健康数据科学原理", courseCode: "CHME0006", time: "11:00 - 13:00", location: "UCL East Building One 1.03", color: "bg-[#F59E0B]" },
+];
+
+// Calendar events - 与家长端同步的课程数据
+const mockCalendarEvents = [
+    // 今日课程 (11月11日)
+    { 
+        id: 1, 
+        course: '数据科学与统计', 
+        courseCode: 'CHME0007',
+        type: 'lecture', 
+        startTime: new Date(2025, 10, 11, 14, 0), 
+        endTime: new Date(2025, 10, 11, 16, 0), 
+        location: 'Cruciform Building, Room 4.18',
+        lecturer: 'Dr. Johnson'
+    },
+    { 
+        id: 2, 
+        course: '健康数据科学原理', 
+        courseCode: 'CHME0006',
+        type: 'lecture', 
+        startTime: new Date(2025, 10, 11, 16, 30), 
+        endTime: new Date(2025, 10, 11, 18, 30), 
+        location: 'Foster Court, Lecture Theatre',
+        lecturer: 'Prof. Smith'
+    },
+    // 明日课程 (11月12日)
+    { 
+        id: 3, 
+        course: '数据方法与健康研究', 
+        courseCode: 'CHME0013',
+        type: 'lecture', 
+        startTime: new Date(2025, 10, 12, 10, 0), 
+        endTime: new Date(2025, 10, 12, 12, 0), 
+        location: 'Main Building, Room 201',
+        lecturer: 'Dr. Chen'
+    },
+    { 
+        id: 4, 
+        course: '深度学习应用', 
+        courseCode: 'CHME0022',
+        type: 'lecture', 
+        startTime: new Date(2025, 10, 12, 14, 0), 
+        endTime: new Date(2025, 10, 12, 16, 0), 
+        location: 'Computer Lab 3',
+        lecturer: 'Prof. Wang'
+    },
+    // 本周其他课程 (11月13日)
+    { 
+        id: 5, 
+        course: '数据科学与统计', 
+        courseCode: 'CHME0007',
+        type: 'lecture', 
+        startTime: new Date(2025, 10, 13, 14, 0), 
+        endTime: new Date(2025, 10, 13, 16, 0), 
+        location: 'Cruciform Building, Room 4.18',
+        lecturer: 'Dr. Johnson'
+    },
+    { 
+        id: 6, 
+        course: '健康数据科学原理', 
+        courseCode: 'CHME0006',
+        type: 'lecture', 
+        startTime: new Date(2025, 10, 13, 16, 30), 
+        endTime: new Date(2025, 10, 13, 18, 30), 
+        location: 'Foster Court, Lecture Theatre',
+        lecturer: 'Prof. Smith'
+    }
+];
+
+// From StudentEmailView
+const mockEmails = [
+    { id: "e1", title: "紧急：CHME0007 统计建模作业提交提醒", sender: "Dr. Johnson", excerpt: "请注意，统计建模作业将于 11 月 10 日截止...", category: "Urgent", date: "2h ago", isRead: false },
+    { id: "e2", title: "UCL AI Society：本周研讨会", sender: "AI Society", excerpt: "加入我们，与来自 DeepMind 的客座讲师一起探讨...", category: "Events", date: "8h ago", isRead: false },
+    { id: "e3", title: "Re: 小组项目会议时间", sender: "Zhang Wei", excerpt: "大家周三下午 2 点在图书馆见面如何？", category: "Academic", date: "1d ago", isRead: true },
+    { id: "e4", title: "CHME0013 作业已评分：数据分析作业", sender: "UCL Moodle", excerpt: "您的“数据分析作业”已评分。得分：90/100。", category: "Academic", date: "2d ago", isRead: true },
+];
+
+const mockEmailDetails = {
+    "Dr. Johnson": {
+        original: "Dear Student,\n\nThis is a reminder that your assignment '统计建模' for CHME0007 is due on November 10th.\n\nPlease ensure you submit via Moodle before 23:59.\n\nBest,\nDr. Johnson",
+        aiTranslation: "亲爱的同学，\n\n此邮件提醒您，CHME0007 课程的“统计建模”作业将于 11 月 10 日截止。\n\n请确保在 23:59 前通过 Moodle 提交。\n\n祝好，\nDr. Johnson",
+        aiSummary: ["📧 作业提醒：统计建模", "📅 截止日期：11月10日 23:59", "📍 提交方式：Moodle"]
+    },
+    "AI Society": {
+        original: "Hi everyone,\n\nJoin us this Wednesday for an exciting seminar with a guest speaker from DeepMind!\n\nTopic: \"The Future of Large Language Models in Healthcare\"\nSpeaker: Dr. Sarah Chen, Research Scientist at DeepMind\n\nWe'll be discussing:\n- Latest advances in medical LLMs\n- Ethical considerations in AI healthcare\n- Career opportunities in AI research\n\nTime: 6:00 PM - 8:00 PM, Wednesday, November 13th\nLocation: Cruciform Building, Room B.4.01\n\nFree pizza and drinks will be provided! 🍕\n\nPlease RSVP by Monday so we can order enough food.\n\nLooking forward to seeing you there!\n\nBest,\nUCL AI Society Committee",
+        aiTranslation: "大家好，\n\n本周三我们邀请了来自 DeepMind 的客座讲师举办精彩研讨会！\n\n主题：「医疗健康领域的大型语言模型未来」\n演讲者：Dr. Sarah Chen，DeepMind 研究科学家\n\n我们将讨论：\n- 医疗 LLM 的最新进展\n- AI 医疗的伦理考量\n- AI 研究的职业机会\n\n时间：11月13日周三 下午6:00 - 8:00\n地点：Cruciform Building B.4.01 教室\n\n免费提供披萨和饮料！🍕\n\n请在周一前回复，以便我们订购足够的食物。\n\n期待您的参与！\n\nUCL AI Society 委员会",
+        aiSummary: [
+            "📧 活动邀请：AI 研讨会",
+            "🗣️ 演讲者：Dr. Sarah Chen (DeepMind)",
+            "📚 主题：医疗 LLM 的未来",
+            "📅 时间：11月13日周三 6-8 PM",
+            "📍 地点：Cruciform Building B.4.01",
+            "🍕 福利：免费披萨和饮料",
+            "✅ 需要：周一前 RSVP"
+        ]
+    },
+    "Zhang Wei": {
+        original: "Hi everyone,\n\nHope you're all doing well! I wanted to follow up on our group project discussion.\n\nHow about we meet on Wednesday at 2 PM in the library (Level 3, Study Room 7)?\n\nAgenda:\n1. Review project requirements\n2. Divide tasks among team members\n3. Set up our GitHub repository\n4. Plan our next sprint\n\nPlease let me know if this time works for everyone. If not, I can send out a Doodle poll to find a better time.\n\nLooking forward to working with you all!\n\nCheers,\nZhang Wei",
+        aiTranslation: "大家好，\n\n希望大家一切都好！我想跟进一下我们的小组项目讨论。\n\n周三下午 2 点在图书馆见面如何？（3 楼，自习室 7）\n\n议程：\n1. 回顾项目要求\n2. 在团队成员间分配任务\n3. 设置 GitHub 仓库\n4. 规划下一个冲刺\n\n请告诉我这个时间是否适合大家。如果不行，我可以发送 Doodle 投票来找一个更好的时间。\n\n期待与大家合作！\n\n干杯，\nZhang Wei",
+        aiSummary: [
+            "📧 会议邀请：小组项目讨论",
+            "📅 时间：周三下午 2 点",
+            "📍 地点：图书馆3楼自习室7",
+            "📋 议程：回顾要求、分配任务、设置 GitHub、计划冲刺",
+            "💬 需要回复确认时间"
+        ]
+    },
+    "UCL Moodle": {
+        original: "Dear Student,\n\nYour assignment \"Data Analysis Project\" for CHME0013 has been graded.\n\nScore: 90/100\nGrade: A\n\nFeedback from instructor:\n\"Excellent work on the statistical analysis and data visualization. Your interpretation of the results was thorough and well-reasoned. The only area for improvement would be to include more discussion on the limitations of your methodology.\n\nStrengths:\n- Clear and well-structured report\n- Appropriate choice of statistical methods\n- High-quality visualizations\n- Insightful conclusions\n\nAreas for improvement:\n- Discuss methodology limitations\n- Include more references to recent literature\n\nOverall, this is a strong piece of work. Well done!\"\n\nYou can view your detailed feedback and annotated submission on Moodle.\n\nBest regards,\nUCL Moodle System",
+        aiTranslation: "亲爱的同学，\n\n您的 CHME0013 课程作业「数据分析项目」已评分。\n\n分数：90/100\n等级：A\n\n教师反馈：\n「在统计分析和数据可视化方面做得非常出色。您对结果的解释全面且推理充分。唯一需要改进的地方是更多地讨论方法的局限性。\n\n优点：\n- 报告清晰且结构良好\n- 统计方法选择恰当\n- 高质量的可视化\n- 富有洞察力的结论\n\n改进方向：\n- 讨论方法局限性\n- 引用更多近期文献\n\n总体而言，这是一份优秀的作业。做得好！」\n\n您可以在 Moodle 上查看详细反馈和批注的提交内容。\n\n祝好，\nUCL Moodle 系统",
+        aiSummary: [
+            "📧 成绩通知：数据分析项目",
+            "✅ 分数：90/100 (A)",
+            "👍 优点：分析出色、可视化高质量、结论有洞察力",
+            "📝 改进：讨论方法局限性、增加文献引用",
+            "🎉 总评：优秀作业！"
+        ]
+    }
+};
+
+// From StudentHealthView
+const mockHealthMetrics = {
+    day: [
+        { id: "h1", title: "睡眠", value: "7.4", unit: "小时", icon: BedDouble, trend: "up", color: "#6366F1", progress: 0.74, description: "昨晚睡眠 7 小时 24 分，质量良好。建议维持 ≥7h。" },
+        { id: "h2", title: "心率", value: "72", unit: "bpm", icon: HeartPulse, trend: "stable", color: "#EF4444", progress: 0.55, description: "当前静息心率 72 次/分，属正常范围。" },
+        { id: "h3", title: "步数", value: "8,520", unit: "步", icon: Footprints, trend: "up", color: "#10B981", progress: 0.85, description: "今日步数已接近 10,000 步目标。继续加油！" },
+        { id: "h4", title: "压力", value: "中等", unit: "", icon: BrainCircuit, trend: "stable", color: "#F59E0B", progress: 0.50, description: "压力处于可控状态，适当休息避免累积。" }
+    ],
+    week: [
+        { id: "h5", title: "平均睡眠", value: "6.9", unit: "小时", icon: BedDouble, trend: "down", color: "#6366F1", progress: 0.69, description: "近 7 天平均睡眠略低于建议值，尝试提前 30 分钟入睡。" },
+        { id: "h6", title: "平均心率", value: "74", unit: "bpm", icon: HeartPulse, trend: "up", color: "#EF4444", progress: 0.57, description: "静息心率略升高，建议规律运动与充足休息。" },
+        { id: "h7", title: "总步数", value: "52,300", unit: "步", icon: Footprints, trend: "up", color: "#10B981", progress: 0.95, description: "步数活跃度优秀，保持活动水平。" },
+        { id: "h8", title: "压力指数", value: "0.42", unit: "", icon: BrainCircuit, trend: "up", color: "#F59E0B", progress: 0.42, description: "压力略升，适度放松。" }
+    ],
+};
+
+const mockMedicalRecords = [
+    { id: "r1", formattedDate: "2025年10月20日", type: "普通门诊", doctor: "Dr. Smith", department: "全科", diagnosis: "上呼吸道感染", prescription: ["阿莫西林", "布洛芬"], advice: "多喝水，注意休息。" },
+    { id: "r2", formattedDate: "2025年9月15日", type: "皮肤科", doctor: "Dr. Lee", department: "皮肤科", diagnosis: "湿疹", prescription: ["氢化可的松乳膏"], advice: "保持皮肤湿润，避免刺激物。" },
+];
+
+const mockPrescriptions = [
+    { id: "p1", medicationName: "阿莫西林", specification: "250mg", dosage: "每日 3 次，每次 1 粒", status: "completed", prescribedBy: "Dr. Smith", prescriptionDate: new Date("2025-10-20"), validUntil: new Date("2025-10-27"), remainingQuantity: 0, totalQuantity: 21, reminderEnabled: false, notes: "饭后服用。" },
+    { id: "p2", medicationName: "布洛芬", specification: "200mg", dosage: "需要时服用，缓解疼痛", status: "active", prescribedBy: "Dr. Smith", prescriptionDate: new Date("2025-10-20"), validUntil: new Date("2026-10-20"), remainingQuantity: 15, totalQuantity: 20, reminderEnabled: false, notes: "发烧或疼痛时服用。" },
+    { id: "p3", medicationName: "氢化可的松乳膏", specification: "1%", dosage: "每日 2 次，涂抹患处", status: "active", prescribedBy: "Dr. Lee", prescriptionDate: new Date("2025-09-15"), validUntil: new Date("2026-09-15"), remainingQuantity: 1, totalQuantity: 1, reminderEnabled: true, reminderTime: "09:00", notes: "仅限外用。" },
+];
+
+const mockDepartments = [
+    { id: "d1", name: "全科", icon: HeartPulse, color: "6366F1" },
+    { id: "d2", name: "骨科", icon: User, color: "10B981" }, // Placeholder icon
+    { id: "d3", name: "内科", icon: FileText, color: "F59E0B" }, // Placeholder icon
+    { id: "d4", name: "皮肤科", icon: User, color: "EC4899" }, // Placeholder icon
+    { id: "d5", name: "眼科", icon: Eye, color: "8B5CF6" }, // Placeholder icon
+];
+
+const mockDoctors = [
+    { id: "doc1", name: "Dr. Smith", title: "全科医生", specialization: "全科", experience: 10, available: true, department: "全科" },
+    { id: "doc2", name: "Dr. Lee", title: "皮肤科专家", specialization: "皮肤科", experience: 8, available: true, department: "皮肤科" },
+    { id: "doc3", name: "Dr. Wilson", title: "全科医生", specialization: "全科", experience: 15, available: false, department: "全科" },
+];
+
+// From StudentAIAssistantView
+const demoConversations = {
+    "我下周的 deadline 有哪些？": `
+        为您整理了下周的重要截止日期：\n\n
+        **紧急（2天内）**\n
+        · CS Assignment - 11月9日 23:59\n
+          完成进度：60%，还需完成第三部分\n\n
+        **本周内**\n
+        · 数据科学课程论文 - 11月12日\n
+          建议：开始文献综述部分\n
+        · 健康数据分析报告 - 11月13日\n
+          状态：已收集数据，待分析\n\n
+        我注意到您的 CS Assignment 进度稍慢，需要帮您制定完成计划吗？
+    `,
+    "好的，帮我安排一下": `
+        已为您制定完成计划：\n\n
+        **今天晚上 (3小时)**\n
+        19:00-22:00 - 完成第三部分代码\n
+        建议地点：Main Library (开放至23:00)\n\n
+        **明天 (2小时)**\n
+        14:00-16:00 - 代码测试与调试\n
+        16:00-17:00 - 撰写文档说明\n\n
+        已自动添加到您的日历。\n
+        将在每个时间段前30分钟提醒您。
+    `,
+    "调取一下，另外我想知道我目前的成绩情况": `
+        已为您准备好实验材料：\n
+        Week 7 数据集 → Google Drive/UCL/DataScience/\n
+        参考代码 → 已发送到邮箱\n\n
+        **您的成绩分析报告**\n\n
+        **总体表现**：一等学位水平 (81.7分)\n
+        **排名**：Top 15% in your cohort\n\n
+        **各科详情**：\n
+        · 数据方法与健康研究：87分\n
+        · 数据科学与统计：72分\n
+        · 健康数据科学原理：67分\n\n
+        **趋势分析**：\n
+        · 较上月提升 +2.3分\n
+        · 如果按时提交下周两份作业，预计总分可达 83-85分
+    `,
+    "ucl 图书馆几点开门": `
+        UCL 主要有多个图书馆分馆，开放时间各不相同。\n\n
+        📚 例如位于 Wilkins Building 的 Main Library（主馆）\n
+        📍 地址：Gower Street, WC1E 6BT\n\n
+        你想了解哪个图书馆呢？我可以帮你查询具体的开放时间 😊
+    `,
+    "default": `
+        我理解您的问题。我可以帮您:\n
+        • 📚 查询图书馆信息\n
+        • 📊 分析成绩趋势\n
+        • 📅 查看课程安排\n
+        • 📝 管理作业截止日期\n
+        • 🎯 制定学习计划\n\n
+        请告诉我您最感兴趣的是哪一项?
+    `
+};
+
+// --- App Context ---
+// Used to manage global state like modals
+const AppContext = createContext();
+
+const AppProvider = ({ children }) => {
+    const [activeModal, setActiveModal] = useState(null); // null, 'addTodo', 'appointmentBooking', 'medicalRecords', { type: 'emailDetail', id: 'e1' }, etc.
+    const [todos, setTodos] = useState(mockUpcomingDeadlines);
+
+    const openModal = (modalType, payload = null) => {
+        setActiveModal({ type: modalType, payload });
+    };
+
+    const closeModal = () => {
+        setActiveModal(null);
+    };
+
+    const addTodo = (todo) => {
+        setTodos(prevTodos => [...prevTodos, { ...todo, id: `todo-${Date.now()}` }]);
+        closeModal();
+    };
+
+    const toggleTodo = (id) => {
+        setTodos(prevTodos =>
+            prevTodos.map(todo =>
+                todo.id === id ? { ...todo, isCompleted: !todo.isCompleted } : todo
+            )
+        );
+    };
+
+    return (
+        <AppContext.Provider value={{ activeModal, openModal, closeModal, todos, addTodo, toggleTodo }}>
+            {children}
+        </AppContext.Provider>
+    );
+};
+
+const useApp = () => useContext(AppContext);
+
+// --- Helper Components ---
+
+/**
+ * Modal component to display sheet-like content
+ */
+const Modal = ({ children, onClose }) => {
+    return (
+        <div 
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 flex justify-center items-end"
+            onClick={onClose}
+        >
+            <div 
+                className="bg-gray-50 dark:bg-gray-900 w-full max-w-4xl max-h-[90vh] rounded-t-2xl shadow-xl overflow-hidden flex flex-col"
+                onClick={(e) => e.stopPropagation()}
+            >
+                {/* Modal Header Bar */}
+                <div className="w-full flex justify-center pt-3 pb-2 bg-gray-100 dark:bg-gray-800 sticky top-0 z-10">
+                    <div className="w-20 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
+                </div>
+                {/* Modal Content */}
+                <div className="overflow-y-auto px-4 pb-6">
+                    {children}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+/**
+ * Segmented Control
+ */
+const SegmentedControl = ({ tabs, selected, setSelected }) => {
+    return (
+        <div className="w-full bg-gray-200/80 dark:bg-gray-700/80 p-1 rounded-lg flex items-center">
+            {tabs.map(tab => (
+                <button
+                    key={tab.id}
+                    onClick={() => setSelected(tab.id)}
+                    className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all duration-300
+                        ${selected === tab.id 
+                            ? 'bg-white dark:bg-gray-800 shadow text-indigo-600 dark:text-indigo-400' 
+                            : 'text-gray-600 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-600/50'}
+                    `}
+                >
+                    {tab.label}
+                </button>
+            ))}
+        </div>
+    );
+};
+
+/**
+ * Circular Progress Gauge
+ */
+const CircularProgress = ({ value, color = "#6366F1", size = 100, strokeWidth = 10 }) => {
+    const radius = (size - strokeWidth) / 2;
+    const circumference = radius * 2 * Math.PI;
+    const offset = circumference - (value / 100) * circumference;
+
+    return (
+        <div className="relative" style={{ width: size, height: size }}>
+            <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90">
+                <circle
+                    className="text-gray-200 dark:text-gray-700"
+                    stroke="currentColor"
+                    strokeWidth={strokeWidth}
+                    fill="transparent"
+                    r={radius}
+                    cx={size / 2}
+                    cy={size / 2}
+                />
+                <circle
+                    stroke={color}
+                    strokeWidth={strokeWidth}
+                    strokeLinecap="round"
+                    fill="transparent"
+                    r={radius}
+                    cx={size / 2}
+                    cy={size / 2}
+                    style={{
+                        strokeDasharray: circumference,
+                        strokeDashoffset: offset,
+                        transition: 'stroke-dashoffset 0.5s ease-out'
+                    }}
+                />
+            </svg>
+        </div>
+    );
+};
+
+/**
+ * Trend Arrow Icon
+ */
+const TrendIcon = ({ trend }) => {
+    switch (trend) {
+        case 'up':
+            return <ArrowUpRight className="w-4 h-4 text-green-500" />;
+        case 'down':
+            return <ArrowDownRight className="w-4 h-4 text-red-500" />;
+        default:
+            return <ArrowRight className="w-4 h-4 text-gray-400" />;
+    }
+};
+
+/**
+ * Priority Chip
+ */
+const PriorityChip = ({ priority, isSelected, onClick }) => {
+    const styles = {
+        high: {
+            bg: isSelected ? "bg-red-500" : "bg-red-100 dark:bg-red-900/50",
+            text: isSelected ? "text-white" : "text-red-600 dark:text-red-400",
+            border: "border-red-500",
+        },
+        medium: {
+            bg: isSelected ? "bg-yellow-500" : "bg-yellow-100 dark:bg-yellow-900/50",
+            text: isSelected ? "text-white" : "text-yellow-600 dark:text-yellow-400",
+            border: "border-yellow-500",
+        },
+        low: {
+            bg: isSelected ? "bg-green-500" : "bg-green-100 dark:bg-green-900/50",
+            text: isSelected ? "text-white" : "text-green-600 dark:text-green-400",
+            border: "border-green-500",
+        },
+    };
+    const style = styles[priority] || styles.medium;
+
+    return (
+        <button
+            onClick={onClick}
+            className={`flex-1 py-3 px-4 rounded-lg transition-all ${style.bg} ${style.text}`}
+        >
+            <div className="flex items-center justify-center space-x-2">
+                <Flag className="w-4 h-4" />
+                <span className="font-medium text-sm capitalize">{priority === 'high' ? '高' : priority === 'medium' ? '中' : '低'}</span>
+            </div>
+        </button>
+    );
+};
+
+// --- Modal Components ---
+
+/**
+ * Add Todo Modal (from AddTodoView.swift)
+ */
+const AddTodoModal = () => {
+    const { closeModal, addTodo } = useApp();
+    const [title, setTitle] = useState("");
+    const [category, setCategory] = useState("作业");
+    const [priority, setPriority] = useState("medium");
+    const [dueDate, setDueDate] = useState(new Date().toISOString().slice(0, 16));
+    const [hasDueDate, setHasDueDate] = useState(true);
+    const [notes, setNotes] = useState("");
+
+    const categories = ["作业", "考试", "项目", "阅读", "实验", "论文", "其他"];
+
+    const handleSubmit = () => {
+        if (!title) {
+            // In a real app, use a better notification
+            // For this environment, we'll avoid alert()
+            console.error("请输入标题");
+            return;
+        }
+        addTodo({
+            title,
+            category,
+            priority,
+            dueDate: hasDueDate ? new Date(dueDate) : null,
+            notes,
+            isCompleted: false
+        });
+    };
+
+    return (
+        <div className="p-4 space-y-6">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">添加待办事项</h2>
+
+            {/* Title */}
+            <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+                    <FileText className="w-4 h-4 mr-2 text-indigo-500" />
+                    标题 <span className="text-red-500 ml-1">*</span>
+                </label>
+                <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="请输入待办事项标题"
+                    className="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white"
+                />
+            </div>
+
+            {/* Category */}
+            <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+                    <BookMarked className="w-4 h-4 mr-2 text-indigo-500" />
+                    分类
+                </label>
+                <div className="flex flex-wrap gap-2">
+                    {categories.map(cat => (
+                        <button
+                            key={cat}
+                            onClick={() => setCategory(cat)}
+                            className={`py-2 px-4 rounded-full text-sm font-medium transition-all
+                                ${category === cat 
+                                    ? 'bg-indigo-600 text-white' 
+                                    : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200'}
+                            `}
+                        >
+                            {cat}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Priority */}
+            <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+                    <Flag className="w-4 h-4 mr-2 text-indigo-500" />
+                    优先级
+                </label>
+                <div className="flex space-x-2">
+                    <PriorityChip priority="low" isSelected={priority === 'low'} onClick={() => setPriority('low')} />
+                    <PriorityChip priority="medium" isSelected={priority === 'medium'} onClick={() => setPriority('medium')} />
+                    <PriorityChip priority="high" isSelected={priority === 'high'} onClick={() => setPriority('high')} />
+                </div>
+            </div>
+            
+            {/* Due Date */}
+            <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+                        <CalendarIcon className="w-4 h-4 mr-2 text-indigo-500" />
+                        截止日期
+                    </label>
+                    <input
+                        type="checkbox"
+                        checked={hasDueDate}
+                        onChange={() => setHasDueDate(!hasDueDate)}
+                        className="h-4 w-4 text-indigo-600 rounded"
+                    />
+                </div>
+                {hasDueDate && (
+                    <input
+                        type="datetime-local"
+                        value={dueDate}
+                        onChange={(e) => setDueDate(e.target.value)}
+                        className="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white"
+                    />
+                )}
+            </div>
+
+            {/* Notes */}
+            <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+                    <Info className="w-4 h-4 mr-2 text-indigo-500" />
+                    备注
+                </label>
+                <textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    rows="3"
+                    className="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white"
+                    placeholder="添加更多详情..."
+                />
+            </div>
+
+            {/* Add Button */}
+            <button
+                onClick={handleSubmit}
+                className="w-full py-4 px-6 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-md flex items-center justify-center space-x-2 transition-all"
+            >
+                <Plus className="w-5 h-5" />
+                <span>添加待办事项</span>
+            </button>
+        </div>
+    );
+};
+
+/**
+ * Appointment Booking Modal (from AppointmentBookingView.swift)
+ */
+const AppointmentBookingModal = () => {
+    const { closeModal } = useApp();
+    const [step, setStep] = useState(1);
+    const [selectedDepartment, setSelectedDepartment] = useState(null);
+    const [selectedDoctor, setSelectedDoctor] = useState(null);
+    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().slice(0, 10));
+    const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
+    const [patientName, setPatientName] = useState("");
+    const [patientPhone, setPatientPhone] = useState("");
+    const [symptoms, setSymptoms] = useState("");
+
+    const timeSlots = ["09:00", "09:30", "10:00", "10:30", "11:00", "14:00", "14:30", "15:00"];
+
+    const canProceed = () => {
+        if (step === 1) return selectedDoctor;
+        if (step === 2) return selectedTimeSlot;
+        if (step === 3) return patientName && patientPhone && symptoms;
+        if (step === 4) return true;
+        return false;
+    };
+
+    const handleNext = () => {
+        if (canProceed()) setStep(s => s + 1);
+    };
+
+    const handleBack = () => {
+        if (step > 1) setStep(s => s - 1);
+    };
+
+    const handleConfirm = () => {
+        console.log("预约成功！"); // Replace with better UI
+        closeModal();
+    };
+
+    return (
+        <div className="p-4 space-y-4">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">预约面诊</h2>
+
+            {/* Step Indicator */}
+            <div className="flex items-center w-full px-4">
+                {[1, 2, 3, 4].map((s, index) => (
+                    <React.Fragment key={s}>
+                        <div className="flex flex-col items-center">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center
+                                ${step >= s ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'}
+                            `}>
+                                {step > s ? <Check className="w-5 h-5" /> : s}
+                            </div>
+                        </div>
+                        {index < 3 && (
+                            <div className={`flex-1 h-1 ${step > s ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-700'}`}></div>
+                        )}
+                    </React.Fragment>
+                ))}
+            </div>
+
+            {/* Step Content */}
+            <div className="py-4">
+                {step === 1 && (
+                    <div className="space-y-4">
+                        <h3 className="text-lg font-semibold dark:text-white">1. 选择科室和医生</h3>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">科室</label>
+                            <div className="flex space-x-2 overflow-x-auto pb-2">
+                                {mockDepartments.map(dept => (
+                                    <button
+                                        key={dept.id}
+                                        onClick={() => { setSelectedDepartment(dept); setSelectedDoctor(null); }}
+                                        className={`flex flex-col items-center p-3 rounded-lg border-2 w-24 flex-shrink-0 ${selectedDepartment?.id === dept.id ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/50' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'}`}
+                                    >
+                                        <dept.icon className={`w-6 h-6 text-[#${dept.color}]`} />
+                                        <span className="text-sm font-medium mt-1 text-gray-800 dark:text-gray-200">{dept.name}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                        {selectedDepartment && (
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">医生</label>
+                                <div className="space-y-2">
+                                    {mockDoctors.filter(d => d.department === selectedDepartment.name).map(doc => (
+                                        <button
+                                            key={doc.id}
+                                            onClick={() => setSelectedDoctor(doc)}
+                                            className={`w-full text-left p-3 rounded-lg border-2 flex justify-between items-center ${selectedDoctor?.id === doc.id ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/50' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'}`}
+                                        >
+                                            <div>
+                                                <p className="font-semibold text-gray-900 dark:text-white">{doc.name} <span className="text-sm font-normal text-gray-500 dark:text-gray-400">{doc.title}</span></p>
+                                                <p className="text-sm text-gray-600 dark:text-gray-300">{doc.experience}年经验</p>
+                                            </div>
+                                            {selectedDoctor?.id === doc.id && <CheckCircle className="w-5 h-5 text-indigo-600" />}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+                {step === 2 && (
+                    <div className="space-y-4">
+                        <h3 className="text-lg font-semibold dark:text-white">2. 选择时间</h3>
+                        <input
+                            type="date"
+                            value={selectedDate}
+                            onChange={(e) => setSelectedDate(e.target.value)}
+                            className="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white"
+                        />
+                        <div className="grid grid-cols-3 gap-2">
+                            {timeSlots.map(slot => (
+                                <button
+                                    key={slot}
+                                    onClick={() => setSelectedTimeSlot(slot)}
+                                    className={`py-3 px-2 rounded-lg text-sm font-medium ${selectedTimeSlot === slot ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}`}
+                                >
+                                    {slot}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+                {step === 3 && (
+                    <div className="space-y-4">
+                        <h3 className="text-lg font-semibold dark:text-white">3. 填写信息</h3>
+                        <input type="text" placeholder="患者姓名" value={patientName} onChange={e => setPatientName(e.target.value)} className="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white" />
+                        <input type="tel" placeholder="联系电话" value={patientPhone} onChange={e => setPatientPhone(e.target.value)} className="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white" />
+                        <textarea placeholder="症状描述" value={symptoms} onChange={e => setSymptoms(e.target.value)} rows="3" className="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white" />
+                    </div>
+                )}
+                {step === 4 && (
+                    <div className="space-y-4 text-gray-800 dark:text-gray-200">
+                        <h3 className="text-lg font-semibold dark:text-white">4. 确认预约</h3>
+                        <p><strong>医生:</strong> {selectedDoctor?.name}</p>
+                        <p><strong>科室:</strong> {selectedDepartment?.name}</p>
+                        <p><strong>时间:</strong> {selectedDate} {selectedTimeSlot}</p>
+                        <p><strong>患者:</strong> {patientName}</p>
+                        <p><strong>症状:</strong> {symptoms}</p>
+                        <div className="p-3 bg-yellow-100 dark:bg-yellow-900/50 border border-yellow-300 dark:border-yellow-700 rounded-lg text-yellow-800 dark:text-yellow-200 text-sm">
+                            <p><strong>温馨提示:</strong></p>
+                            <ul className="list-disc list-inside">
+                                <li>请提前15分钟到达诊室</li>
+                                <li>携带相关病历和检查报告</li>
+                            </ul>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Navigation Buttons */}
+            <div className="flex space-x-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                {step > 1 && (
+                    <button
+                        onClick={handleBack}
+                        className="flex-1 py-3 px-4 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-medium rounded-lg"
+                    >
+                        上一步
+                    </button>
+                )}
+                {step < 4 ? (
+                    <button
+                        onClick={handleNext}
+                        disabled={!canProceed()}
+                        className="flex-1 py-3 px-4 bg-indigo-600 text-white font-medium rounded-lg disabled:bg-gray-300 dark:disabled:bg-gray-600"
+                    >
+                        下一步
+                    </button>
+                ) : (
+                    <button
+                        onClick={handleConfirm}
+                        className="flex-1 py-3 px-4 bg-green-600 text-white font-medium rounded-lg"
+                    >
+                        确认预约
+                    </button>
+                )}
+            </div>
+        </div>
+    );
+};
+
+/**
+ * Medical Records Modal (from MedicalRecordsView.swift)
+ */
+const MedicalRecordsModal = () => {
+    return (
+        <div className="p-4 space-y-4">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">就诊历史</h2>
+            <div className="space-y-3">
+                {mockMedicalRecords.map(record => (
+                    <div key={record.id} className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+                        <div className="flex justify-between items-center mb-2">
+                            <span className="font-semibold text-gray-900 dark:text-white">{record.formattedDate}</span>
+                            <span className="py-1 px-3 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 text-xs font-medium rounded-full">{record.type}</span>
+                        </div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{record.doctor} · {record.department}</p>
+                        <p className="font-medium text-gray-800 dark:text-gray-200 mt-1">{record.diagnosis}</p>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+/**
+ * Prescriptions Modal (from PrescriptionsView.swift)
+ */
+const PrescriptionsModal = () => {
+    return (
+        <div className="p-4 space-y-4">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">处方记录</h2>
+            <div className="space-y-3">
+                {mockPrescriptions.map(p => (
+                    <div key={p.id} className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+                        <div className="flex justify-between items-center mb-2">
+                            <span className="font-semibold text-gray-900 dark:text-white">{p.medicationName} <span className="text-sm font-normal text-gray-500 dark:text-gray-400">{p.specification}</span></span>
+                            <span className={`py-1 px-3 text-xs font-medium rounded-full ${p.status === 'active' ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}`}>
+                                {p.status === 'active' ? '使用中' : '已完成'}
+                            </span>
+                        </div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{p.dosage}</p>
+                        {p.status === 'active' && (
+                            <div className="mt-2">
+                                <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400 mb-1">
+                                    <span>剩余</span>
+                                    <span>{p.remainingQuantity}/{p.totalQuantity}</span>
+                                </div>
+                                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                    <div 
+                                        className="bg-green-500 h-2 rounded-full" 
+                                        style={{ width: `${(p.remainingQuantity / p.totalQuantity) * 100}%` }}
+                                    ></div>
+                                </div>
+                            </div>
+                        )}
+                        {p.reminderEnabled && (
+                            <p className="text-sm text-indigo-600 dark:text-indigo-400 mt-2 flex items-center">
+                                <Bell className="w-4 h-4 mr-1" />
+                                提醒: {p.reminderTime}
+                            </p>
+                        )}
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+/**
+ * Email Detail Modal (from StudentEmailView.swift)
+ */
+const EmailDetailModal = ({ emailId }) => {
+    const email = mockEmails.find(e => e.id === emailId);
+    const detail = mockEmailDetails[email?.sender] || { original: email?.excerpt, aiTranslation: email?.excerpt, aiSummary: [] };
+    const [showTranslation, setShowTranslation] = useState(false);
+    const [showSummary, setShowSummary] = useState(false);
+
+    if (!email) return <div className="p-4 text-gray-900 dark:text-white">邮件未找到</div>;
+
+    return (
+        <div className="p-4 space-y-4">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">{email.title}</h2>
+            <div className="pb-3 border-b border-gray-200 dark:border-gray-700">
+                <p className="text-sm font-medium text-gray-800 dark:text-gray-200">发件人: {email.sender}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">时间: {email.date}</p>
+            </div>
+            
+            {/* Original Content */}
+            <div className="space-y-2">
+                <h3 className="font-semibold text-gray-800 dark:text-gray-200">邮件内容</h3>
+                <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{detail.original}</p>
+            </div>
+
+            {/* AI Buttons */}
+            <div className="flex space-x-2">
+                <button
+                    onClick={() => setShowTranslation(!showTranslation)}
+                    className={`flex-1 py-3 px-4 rounded-lg font-medium text-white ${showTranslation ? 'bg-green-600' : 'bg-indigo-600'}`}
+                >
+                    {showTranslation ? '已翻译' : 'AI 翻译'}
+                </button>
+                <button
+                    onClick={() => setShowSummary(!showSummary)}
+                    className={`flex-1 py-3 px-4 rounded-lg font-medium text-white ${showSummary ? 'bg-green-600' : 'bg-indigo-600'}`}
+                >
+                    {showSummary ? '已总结' : 'AI 总结'}
+                </button>
+            </div>
+
+            {/* AI Content */}
+            {showTranslation && (
+                <div className="p-3 bg-blue-50 dark:bg-blue-900/50 border border-blue-200 dark:border-blue-700 rounded-lg">
+                    <h3 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">AI 翻译</h3>
+                    <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{detail.aiTranslation}</p>
+                </div>
+            )}
+            {showSummary && detail.aiSummary.length > 0 && (
+                <div className="p-3 bg-purple-50 dark:bg-purple-900/50 border border-purple-200 dark:border-purple-700 rounded-lg">
+                    <h3 className="font-semibold text-purple-800 dark:text-purple-200 mb-2">AI 总结</h3>
+                    <ul className="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+                        {detail.aiSummary.map((item, i) => <li key={i}>{item}</li>)}
+                    </ul>
+                </div>
+            )}
+        </div>
+    );
+};
+
+/**
+ * Module Detail Modal (from StudentAcademicsView.swift)
+ */
+const ModuleDetailModal = ({ moduleId }) => {
+    const module = mockModules.find(m => m.id === moduleId);
+    if (!module) return <div className="p-4 text-gray-900 dark:text-white">课程未找到</div>;
+
+    const markColor = (mark) => {
+        if (mark >= 80) return "text-green-600 dark:text-green-400";
+        if (mark >= 70) return "text-purple-600 dark:text-purple-400";
+        if (mark >= 60) return "text-yellow-600 dark:text-yellow-400";
+        return "text-red-600 dark:text-red-400";
+    };
+
+    return (
+        <div className="p-4 space-y-4">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{module.name}</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 -mt-3">{module.code}</p>
+            
+            <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+                <div className="flex justify-between items-center">
+                    <span className="text-lg font-medium text-gray-800 dark:text-gray-200">总成绩</span>
+                    <span className={`text-4xl font-bold ${markColor(module.mark)}`}>{module.mark > 0 ? module.mark : 'N/A'}</span>
+                </div>
+            </div>
+
+            {module.gradeBreakdown.length > 0 && (
+                <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow space-y-3">
+                    <h3 className="font-semibold text-gray-900 dark:text-white">成绩构成</h3>
+                    {module.gradeBreakdown.map(item => (
+                        <div key={item.component}>
+                            <div className="flex justify-between text-sm text-gray-600 dark:text-gray-300 mb-1">
+                                <span>{item.component} ({item.weight}%)</span>
+                                <span>{item.grade}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                <div className="bg-indigo-500 h-2 rounded-full" style={{ width: `${item.grade}%` }}></div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {module.assignmentList.length > 0 && (
+                <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow space-y-3">
+                    <h3 className="font-semibold text-gray-900 dark:text-white">作业列表</h3>
+                    {module.assignmentList.map(item => (
+                        <div key={item.id} className="flex justify-between items-center text-sm">
+                            <div className="flex items-center">
+                                {item.submitted ? 
+                                    <CheckCircle className="w-4 h-4 text-green-500 mr-2" /> : 
+                                    <Clock className="w-4 h-4 text-yellow-500 mr-2" />
+                                }
+                                <span className="text-gray-700 dark:text-gray-300">{item.name}</span>
+                            </div>
+                            <span className={`font-medium ${item.submitted ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}>
+                                {item.submitted ? `${item.grade}/100` : `截止: ${item.dueDate}`}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
+
+// --- Page Components ---
+
+/**
+ * Page: Dashboard (from StudentDashboardView.swift)
+ */
+const Dashboard = () => {
+    const { openModal, todos } = useApp();
+    
+    return (
+        <div className="space-y-6">
+            {/* Header */}
+            <div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">欢迎, Zoya</h1>
+                <p className="text-base text-gray-600 dark:text-gray-400">MSc Health Data Science · Year 1</p>
+            </div>
+
+            {/* Stats Row */}
+            <div className="grid grid-cols-3 gap-3">
+                <StatCard title="即将截止" value={todos.filter(t => !t.isCompleted).length} icon={Clock} color="text-yellow-500" />
+                <StatCard title="今日课程" value={mockTodayClasses.length} icon={BookOpen} color="text-indigo-500" />
+                <StatCard title="待办" value={todos.filter(t => !t.isCompleted).length} icon={CheckCircle} color="text-green-500" />
+            </div>
+
+            {/* Today's Classes */}
+            <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">📚 今日课程</h2>
+                    <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">查看全部</span>
+                </div>
+                {mockTodayClasses.length > 0 ? (
+                    <div className="space-y-3">
+                        {mockTodayClasses.map(item => <TodayClassCard key={item.id} item={item} />)}
+                    </div>
+                ) : (
+                    <EmptyStateCard icon={Check} message="今天没有课程，好好利用这段时间！" />
+                )}
+            </div>
+            
+            {/* Upcoming Deadlines */}
+            <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">⏰ 即将截止</h2>
+                    <button onClick={() => openModal('addTodo')} className="text-sm font-medium text-indigo-600 dark:text-indigo-400 flex items-center">
+                        <Plus className="w-4 h-4 mr-1" /> 添加
+                    </button>
+                </div>
+                {todos.filter(t => !t.isCompleted).length > 0 ? (
+                    <div className="space-y-3">
+                        {todos.filter(t => !t.isCompleted).slice(0, 3).map(todo => 
+                            <DeadlineCard key={todo.id} todo={todo} onClick={() => console.log('Open todo detail')} />
+                        )}
+                    </div>
+                ) : (
+                    <EmptyStateCard icon={Check} message="暂无待办事项，所有任务都已完成！" />
+                )}
+            </div>
+            
+            {/* Recommendations */}
+            <div className="space-y-3">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">✨ 为你推荐</h2>
+                <RecommendationCard 
+                    title="数据科学研讨会"
+                    type="学术"
+                    date="11月15日"
+                    location="Online"
+                    icon={GraduationCap}
+                    color="text-indigo-500"
+                />
+            </div>
+        </div>
+    );
+};
+
+// Dashboard Sub-components
+const StatCard = ({ title, value, icon: Icon, color }) => (
+    <div className="p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-sm">
+        <Icon className={`w-6 h-6 ${color} mb-2`} />
+        <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
+        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{title}</p>
     </div>
-  )
+);
+
+const TodayClassCard = ({ item }) => (
+    <div className="p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-sm flex space-x-4">
+        <div className="flex flex-col items-center justify-center w-16">
+            <span className="text-base font-bold text-indigo-600 dark:text-indigo-400">{item.time.split(' - ')[0]}</span>
+            <div className="h-6 w-0.5 bg-gray-200 dark:bg-gray-700 my-1"></div>
+            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">{item.time.split(' - ')[1]}</span>
+        </div>
+        <div className="flex-1">
+            <h3 className="font-semibold text-gray-900 dark:text-white">{item.name}</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{item.code}</p>
+            <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <MapPin className="w-3 h-3 mr-1.5" />
+                <span>{item.location}</span>
+            </div>
+        </div>
+    </div>
+);
+
+const DeadlineCard = ({ todo, onClick }) => {
+    const timeRemaining = todo.dueDate ? 
+        `${Math.ceil((todo.dueDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))}天后` 
+        : "无截止时间";
+    const colorStyles = {
+        high: { bg: 'bg-red-100 dark:bg-red-900/50', text: 'text-red-600 dark:text-red-400', icon: 'text-red-500' },
+        medium: { bg: 'bg-yellow-100 dark:bg-yellow-900/50', text: 'text-yellow-600 dark:text-yellow-400', icon: 'text-yellow-500' },
+        low: { bg: 'bg-green-100 dark:bg-green-900/50', text: 'text-green-600 dark:text-green-400', icon: 'text-green-500' },
+    };
+    const style = colorStyles[todo.priority] || colorStyles.medium;
+
+    return (
+        <button onClick={onClick} className="w-full p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-sm flex items-center space-x-4 text-left">
+            <div className={`p-3 rounded-full ${style.bg}`}>
+                <Clock className={`w-5 h-5 ${style.icon}`} />
+            </div>
+            <div className="flex-1">
+                <h3 className="font-semibold text-gray-900 dark:text-white">{todo.title}</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{todo.category}</p>
+            </div>
+            <span className={`text-sm font-medium ${style.text}`}>{timeRemaining}</span>
+        </button>
+    );
+};
+
+const RecommendationCard = ({ title, type, date, location, icon: Icon, color }) => (
+    <div className="p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-sm flex items-center space-x-4">
+        <div className={`p-3 rounded-full bg-indigo-100 dark:bg-indigo-900/50`}>
+            <Icon className={`w-5 h-5 ${color}`} />
+        </div>
+        <div className="flex-1">
+            <h3 className="font-semibold text-gray-900 dark:text-white">{title}</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{type} · {date} · {location}</p>
+        </div>
+        <ChevronRight className="w-5 h-5 text-gray-400" />
+    </div>
+);
+
+const EmptyStateCard = ({ icon: Icon, message }) => (
+    <div className="p-10 bg-white dark:bg-gray-800 rounded-2xl shadow-sm flex flex-col items-center justify-center text-center">
+        <div className="p-4 bg-green-100 dark:bg-green-900/50 rounded-full">
+            <Icon className="w-8 h-8 text-green-500" />
+        </div>
+        <p className="mt-4 text-base font-medium text-gray-600 dark:text-gray-300">{message}</p>
+    </div>
+);
+
+
+/**
+ * Page: Academics (from StudentAcademicsView.swift)
+ */
+const Academics = () => {
+    const { openModal } = useApp();
+    const [selectedTab, setSelectedTab] = useState("modules");
+    const tabs = [
+        { id: "modules", label: "课程" },
+        { id: "schedule", label: "课程表" }
+    ];
+    
+    const validModules = mockModules.filter(m => m.mark > 0);
+    const overallAverage = validModules.length > 0 ? validModules.reduce((acc, m) => acc + m.mark, 0) / validModules.length : 0;
+
+    return (
+        <div className="space-y-5">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">学业</h1>
+            <SegmentedControl tabs={tabs} selected={selectedTab} setSelected={setSelectedTab} />
+
+            {selectedTab === "modules" && (
+                <div className="space-y-6">
+                    {/* Overall Average */}
+                    <div className="p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-sm flex items-center space-x-6">
+                        <div className="relative">
+                            <CircularProgress value={overallAverage} size={120} strokeWidth={12} color="#8B5CF6" />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="text-3xl font-bold text-purple-600 dark:text-purple-400">{overallAverage.toFixed(1)}</span>
+                            </div>
+                        </div>
+                        <div className="flex-1">
+                            <span className="py-1 px-3 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 text-xs font-medium rounded-full">
+                                一等学位
+                            </span>
+                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mt-2">总平均分</h2>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">优秀 - 一等学位水平!</p>
+                        </div>
+                    </div>
+                    
+                    {/* Modules List */}
+                    <div className="space-y-3">
+                        {mockModules.map(module => (
+                            <ModuleCard key={module.id} module={module} onClick={() => openModal('moduleDetail', module.id)} />
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {selectedTab === "schedule" && (
+                <div className="space-y-3">
+                    {mockSchedule.map(item => <ScheduleCard key={item.id} item={item} />)}
+                </div>
+            )}
+        </div>
+    );
+};
+
+// Academics Sub-components
+const ModuleCard = ({ module, onClick }) => {
+    const markColor = (mark) => {
+        if (mark >= 80) return "text-green-600 dark:text-green-400";
+        if (mark >= 70) return "text-purple-600 dark:text-purple-400";
+        if (mark >= 60) return "text-yellow-600 dark:text-yellow-400";
+        return "text-red-600 dark:text-red-400";
+    };
+    
+    return (
+        <button onClick={onClick} className="w-full p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-sm text-left">
+            <div className="flex justify-between items-start">
+                <div className="flex-1 mr-4">
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{module.name}</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{module.code}</p>
+                </div>
+                <div className="flex flex-col items-end">
+                    {module.mark > 0 ? (
+                        <span className={`text-2xl font-bold ${markColor(module.mark)}`}>{module.mark}</span>
+                    ) : (
+                        <span className="text-sm font-medium text-yellow-600 dark:text-yellow-400">进行中</span>
+                    )}
+                </div>
+            </div>
+            {module.mark > 0 && (
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mt-3">
+                    <div 
+                        className={`h-1.5 rounded-full ${markColor(module.mark).replace('text-','bg-')}`}
+                        style={{ width: `${module.mark}%` }}
+                    ></div>
+                </div>
+            )}
+        </button>
+    );
+};
+
+const ScheduleCard = ({ item }) => (
+    <div className="p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-sm flex space-x-4">
+        <div className={`w-14 h-14 ${item.color} rounded-lg flex flex-col items-center justify-center flex-shrink-0`}>
+            <span className="text-sm font-bold text-white">{item.dayOfWeek}</span>
+        </div>
+        <div className="flex-1 overflow-hidden">
+            <h3 className="font-semibold text-gray-900 dark:text-white truncate">{item.courseName}</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{item.time}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{item.location}</p>
+        </div>
+    </div>
+);
+
+
+// Calendar View Components (similar to parent view)
+const StudentMonthView = ({ selectedDate, setSelectedDate, events }) => {
+    const [currentMonth, setCurrentMonth] = useState(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1));
+    const daysOfWeek = ['日', '一', '二', '三', '四', '五', '六'];
+    
+    const changeMonth = (amount) => {
+        setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + amount, 1));
+    };
+    
+    const simpleDaysGrid = Array.from({ length: 30 }, (_, i) => i + 1);
+    
+    return (
+        <div className="space-y-3">
+            <div className="flex justify-between items-center px-2">
+                <button onClick={() => changeMonth(-1)} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <ChevronLeft size={20} className="text-indigo-600 dark:text-indigo-400" />
+                </button>
+                <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {currentMonth.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' })}
+                </h4>
+                <button onClick={() => changeMonth(1)} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <ChevronRight size={20} className="text-indigo-600 dark:text-indigo-400" />
+                </button>
+            </div>
+            <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                {daysOfWeek.map(day => <div key={day}>{day}</div>)}
+            </div>
+            <div className="grid grid-cols-7 gap-1">
+                {simpleDaysGrid.map(day => {
+                    const dayDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+                    const isSelected = day === selectedDate.getDate() && currentMonth.getMonth() === selectedDate.getMonth();
+                    const dayEvents = events.filter(e => {
+                        const eventDate = new Date(e.startTime);
+                        return eventDate.getDate() === day && eventDate.getMonth() === currentMonth.getMonth();
+                    });
+                    
+                    return (
+                        <button
+                            key={day}
+                            onClick={() => setSelectedDate(dayDate)}
+                            className={`h-20 w-full rounded-lg p-1 flex flex-col items-center justify-start ${
+                                isSelected ? 'bg-gradient-to-br from-indigo-500 to-indigo-600 text-white ring-2 ring-indigo-400' : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                            }`}
+                        >
+                            <span className={`text-xs font-semibold ${isSelected ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
+                                {day}
+                            </span>
+                            {dayEvents.length > 0 && (
+                                <div className="mt-1 w-full space-y-0.5 overflow-hidden">
+                                    {dayEvents.slice(0, 2).map(event => (
+                                        <div 
+                                            key={event.id} 
+                                            className={`text-[9px] leading-tight px-1 py-0.5 rounded ${
+                                                isSelected ? 'bg-white/30 text-white' : 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200'
+                                            } truncate`}
+                                            title={`${event.course} ${new Date(event.startTime).toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})}`}
+                                        >
+                                            {event.courseCode}
+                                        </div>
+                                    ))}
+                                    {dayEvents.length > 2 && (
+                                        <div className={`text-[9px] font-medium ${isSelected ? 'text-white/80' : 'text-indigo-600 dark:text-indigo-400'}`}>
+                                            +{dayEvents.length - 2}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </button>
+                    );
+                })}
+            </div>
+        </div>
+    );
+};
+
+const StudentWeekView = ({ selectedDate, setSelectedDate, events }) => {
+    const startOfWeek = new Date(selectedDate);
+    startOfWeek.setDate(selectedDate.getDate() - selectedDate.getDay());
+    const days = Array.from({ length: 7 }, (_, i) => {
+        const date = new Date(startOfWeek);
+        date.setDate(startOfWeek.getDate() + i);
+        return date;
+    });
+
+    return (
+        <div className="space-y-3">
+            <div className="flex justify-between space-x-1">
+                {days.map(day => {
+                    const isSelected = day.toDateString() === selectedDate.toDateString();
+                    const dayEvents = events.filter(e => new Date(e.startTime).toDateString() === day.toDateString());
+                    
+                    return (
+                        <button
+                            key={day.toISOString()}
+                            onClick={() => setSelectedDate(day)}
+                            className={`flex-1 flex flex-col items-center space-y-1 p-2 rounded-lg ${
+                                isSelected ? 'bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-lg shadow-indigo-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                            }`}
+                        >
+                            <span className="text-xs">{day.toLocaleDateString('zh-CN', { weekday: 'short' })}</span>
+                            <span className={`font-bold text-lg ${isSelected ? 'text-white' : 'text-gray-800 dark:text-white'}`}>
+                                {day.getDate()}
+                            </span>
+                            {dayEvents.length > 0 && (
+                                <div className={`text-[10px] font-medium ${isSelected ? 'text-white' : 'text-indigo-600 dark:text-indigo-400'}`}>
+                                    {dayEvents.length}节课
+                                </div>
+                            )}
+                        </button>
+                    );
+                })}
+            </div>
+            
+            <div className="space-y-2">
+                {events
+                    .filter(e => new Date(e.startTime).toDateString() === selectedDate.toDateString())
+                    .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))
+                    .map(event => {
+                        const startTime = new Date(event.startTime);
+                        const endTime = new Date(event.endTime);
+                        
+                        return (
+                            <div
+                                key={event.id}
+                                className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 border-l-4 border-indigo-500 rounded-lg p-3 hover:shadow-md transition-shadow"
+                            >
+                                <div className="flex justify-between items-start">
+                                    <div className="flex-1">
+                                        <h4 className="font-semibold text-gray-900 dark:text-white text-sm">{event.course}</h4>
+                                        <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">{event.lecturer}</p>
+                                        <div className="flex items-center space-x-3 mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                            <span className="flex items-center">
+                                                <Clock size={12} className="mr-1" />
+                                                {startTime.toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})} - 
+                                                {endTime.toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})}
+                                            </span>
+                                            <span className="flex items-center">
+                                                <MapPin size={12} className="mr-1" />
+                                                {event.location}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="px-2 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-200 rounded text-xs font-medium">
+                                        {event.courseCode}
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })
+                }
+                {events.filter(e => new Date(e.startTime).toDateString() === selectedDate.toDateString()).length === 0 && (
+                    <div className="text-center py-6 text-gray-400 dark:text-gray-500">
+                        <Book size={32} className="mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">这天没有课程安排</p>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+const StudentDayView = ({ selectedDate, setSelectedDate, events }) => {
+    const changeDay = (amount) => {
+        setSelectedDate(prev => {
+            const newDate = new Date(prev);
+            newDate.setDate(prev.getDate() + amount);
+            return newDate;
+        });
+    };
+    
+    const timeSlots = Array.from({ length: 14 }, (_, i) => i + 8);
+    const dayEvents = events.filter(e => new Date(e.startTime).toDateString() === selectedDate.toDateString());
+
+    return (
+        <div className="space-y-4">
+            <div className="flex justify-between items-center px-2">
+                <button onClick={() => changeDay(-1)} className="p-3 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-900">
+                    <ChevronLeft size={22} className="text-indigo-600 dark:text-indigo-400" />
+                </button>
+                <div className="text-center">
+                    <p className="text-4xl font-bold text-gray-900 dark:text-white">{selectedDate.getDate()}</p>
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        {selectedDate.toLocaleDateString('zh-CN', { month: 'long', weekday: 'long' })}
+                    </p>
+                </div>
+                <button onClick={() => changeDay(1)} className="p-3 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-900">
+                    <ChevronRight size={22} className="text-indigo-600 dark:text-indigo-400" />
+                </button>
+            </div>
+            
+            <div className="relative">
+                {timeSlots.map(hour => {
+                    const hourStart = new Date(selectedDate);
+                    hourStart.setHours(hour, 0, 0, 0);
+                    const hourEnd = new Date(selectedDate);
+                    hourEnd.setHours(hour + 1, 0, 0, 0);
+                    
+                    const hourEvents = dayEvents.filter(event => {
+                        const eventStart = new Date(event.startTime);
+                        const eventEnd = new Date(event.endTime);
+                        return (eventStart >= hourStart && eventStart < hourEnd) || 
+                               (eventEnd > hourStart && eventEnd <= hourEnd) ||
+                               (eventStart <= hourStart && eventEnd >= hourEnd);
+                    });
+                    
+                    return (
+                        <div key={hour} className="flex border-b border-gray-100 dark:border-gray-700">
+                            <div className="w-16 flex-shrink-0 pr-3 py-3 text-xs text-gray-500 dark:text-gray-400 font-medium text-right">
+                                {hour}:00
+                            </div>
+                            <div className="flex-1 py-2 px-2 min-h-[60px] relative">
+                                {hourEvents.map(event => {
+                                    const eventStart = new Date(event.startTime);
+                                    const eventEnd = new Date(event.endTime);
+                                    
+                                    return (
+                                        <div
+                                            key={event.id}
+                                            className="mb-1 p-2 rounded-lg bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900/50 dark:to-purple-900/50 border-l-4 border-indigo-500 hover:shadow-md transition-shadow"
+                                        >
+                                            <div className="font-semibold text-sm text-gray-900 dark:text-white">{event.course}</div>
+                                            <div className="text-xs text-gray-600 dark:text-gray-300 mt-0.5">{event.courseCode}</div>
+                                            <div className="flex items-center space-x-2 mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                                <span className="flex items-center">
+                                                    <Clock size={10} className="mr-1" />
+                                                    {eventStart.toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})} - 
+                                                    {eventEnd.toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})}
+                                                </span>
+                                                <span className="flex items-center">
+                                                    <MapPin size={10} className="mr-1" />
+                                                    {event.location}
+                                                </span>
+                                            </div>
+                                            <div className="text-xs text-gray-600 dark:text-gray-300 mt-1">{event.lecturer}</div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+            
+            {dayEvents.length === 0 && (
+                <div className="text-center py-10 text-gray-400 dark:text-gray-500">
+                    <Book size={40} className="mx-auto mb-3 opacity-50" />
+                    <p>今天没有课程安排</p>
+                </div>
+            )}
+        </div>
+    );
+};
+
+/**
+ * Page: Calendar (from StudentCalendarView.swift)
+ */
+const CalendarPage = () => {
+    const [selectedDate, setSelectedDate] = useState(new Date());
+    const [viewMode, setViewMode] = useState("day");
+    
+    const tabs = [
+        { id: "day", label: "日" },
+        { id: "week", label: "周" },
+        { id: "month", label: "月" },
+    ];
+    
+    const todayEvents = mockCalendarEvents.filter(e => 
+        new Date(e.startTime).toDateString() === selectedDate.toDateString()
+    );
+    
+    return (
+        <div className="space-y-5">
+            <div className="flex justify-between items-center">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">日历</h1>
+                <button className="p-2 bg-indigo-600 text-white rounded-full shadow hover:bg-indigo-700">
+                    <Plus className="w-5 h-5" />
+                </button>
+            </div>
+            <SegmentedControl tabs={tabs} selected={viewMode} setSelected={setViewMode} />
+            
+            <div className="p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-sm">
+                {viewMode === 'month' && <StudentMonthView selectedDate={selectedDate} setSelectedDate={setSelectedDate} events={mockCalendarEvents} />}
+                {viewMode === 'week' && <StudentWeekView selectedDate={selectedDate} setSelectedDate={setSelectedDate} events={mockCalendarEvents} />}
+                {viewMode === 'day' && <StudentDayView selectedDate={selectedDate} setSelectedDate={setSelectedDate} events={mockCalendarEvents} />}
+            </div>
+            
+            {viewMode !== 'week' && (
+                <div className="space-y-3">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">今日日程</h3>
+                    {todayEvents.length > 0 ? (
+                        todayEvents.map(event => (
+                            <ModernEventCard 
+                                key={event.id}
+                                event={{ 
+                                    title: event.course, 
+                                    courseCode: event.courseCode,
+                                    lecturer: event.lecturer,
+                                    location: event.location, 
+                                    startTime: new Date(event.startTime).toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'}), 
+                                    endTime: new Date(event.endTime).toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'}), 
+                                    type: event.type 
+                                }}
+                            />
+                        ))
+                    ) : (
+                        <div className="p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-sm text-center text-gray-400 dark:text-gray-500">
+                            <Book size={32} className="mx-auto mb-2 opacity-50" />
+                            <p>今天没有课程安排</p>
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+};
+
+// Calendar Sub-components
+const ModernEventCard = ({ event }) => (
+    <div className="p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-sm flex space-x-3">
+        <div className="flex flex-col items-center w-16 text-center flex-shrink-0">
+            <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400">{event.startTime}</span>
+            <div className="h-6 w-0.5 bg-gray-200 dark:bg-gray-700 my-1"></div>
+            <span className="text-xs text-gray-500 dark:text-gray-400">{event.endTime}</span>
+        </div>
+        <div className="flex-1 overflow-hidden">
+            <div className="flex items-center space-x-2 mb-1">
+                <span className={`py-0.5 px-2 text-xs font-medium rounded-full ${event.type === '课程' ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300' : 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300'}`}>
+                    {event.type}
+                </span>
+                {event.courseCode && (
+                    <span className="py-0.5 px-2 text-xs font-medium rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                        {event.courseCode}
+                    </span>
+                )}
+            </div>
+            <h3 className="font-semibold text-gray-900 dark:text-white truncate">{event.title}</h3>
+            {event.lecturer && (
+                <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">{event.lecturer}</p>
+            )}
+            <div className="flex items-center space-x-1 mt-1">
+                <MapPin size={12} className="text-gray-400" />
+                <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{event.location}</p>
+            </div>
+        </div>
+    </div>
+);
+
+
+/**
+ * Page: Health (from StudentHealthView.swift)
+ */
+const Health = () => {
+    const { openModal } = useApp();
+    const [range, setRange] = useState("day");
+    const tabs = [
+        { id: "day", label: "今日" },
+        { id: "week", label: "7天" },
+    ];
+    const metrics = mockHealthMetrics[range];
+
+    return (
+        <div className="space-y-5">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">健康</h1>
+            
+            {/* Health Records */}
+            <div className="grid grid-cols-2 gap-3">
+                <HealthRecordButton title="就诊历史" icon={ClipboardList} color="#6366F1" count={mockMedicalRecords.length} onClick={() => openModal('medicalRecords')} />
+                <HealthRecordButton title="处方记录" icon={Pill} color="#EF4444" count={mockPrescriptions.filter(p => p.status === 'active').length} onClick={() => openModal('prescriptions')} />
+                <HealthRecordButton title="预约面诊" icon={CalendarPlus} color="#10B981" count={0} onClick={() => openModal('appointmentBooking')} />
+                <HealthRecordButton title="过敏史" icon={AlertTriangle} color="#F59E0B" count={1} onClick={() => console.log('过敏史：花粉')} />
+            </div>
+
+            <SegmentedControl tabs={tabs} selected={range} setSelected={setRange} />
+            
+            {/* Metrics Grid */}
+            <div className="grid grid-cols-2 gap-3">
+                {metrics.map(metric => (
+                    <HealthMetricCard key={metric.id} metric={metric} />
+                ))}
+            </div>
+            
+            {/* Tips Section */}
+            <div className="p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-sm space-y-3">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">健康建议</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300 flex items-start">
+                    <span className="mr-2 mt-1">💡</span>
+                    保持 7-9 小时睡眠可提升认知与记忆力。
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-300 flex items-start">
+                    <span className="mr-2 mt-1">💡</span>
+                    每天 30 分钟中强度运动有助缓解压力。
+                </p>
+            </div>
+        </div>
+    );
+};
+
+// Health Sub-components
+const HealthRecordButton = ({ title, icon: Icon, color, count, onClick }) => (
+    <button 
+        onClick={onClick} 
+        className="p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-sm text-left"
+    >
+        <div className="flex justify-between items-start">
+            <Icon className="w-6 h-6" style={{ color: color }} />
+            {count > 0 && (
+                <span className="text-lg font-bold" style={{ color: color }}>
+                    {count}
+                </span>
+            )}
+        </div>
+        <h3 className="text-base font-semibold text-gray-900 dark:text-white mt-3">{title}</h3>
+    </button>
+);
+
+const HealthMetricCard = ({ metric }) => (
+    <div className="p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-sm">
+        <div className="flex justify-between items-start">
+            <metric.icon className="w-6 h-6" style={{ color: metric.color }} />
+            <TrendIcon trend={metric.trend} />
+        </div>
+        <p className="text-xs text-gray-500 dark:text-gray-400 uppercase mt-3">{metric.title}</p>
+        <p className="text-2xl font-bold text-gray-900 dark:text-white">
+            {metric.value} <span className="text-base font-normal text-gray-500 dark:text-gray-400">{metric.unit}</span>
+        </p>
+        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mt-2">
+            <div className="h-1.5 rounded-full" style={{ width: `${metric.progress * 100}%`, backgroundColor: metric.color }}></div>
+        </div>
+    </div>
+);
+
+
+/**
+ * Page: AI Assistant (from StudentAIAssistantView.swift)
+ */
+const AIAssistant = () => {
+    const [messages, setMessages] = useState([]);
+    const [input, setInput] = useState("");
+    const [isProcessing, setIsProcessing] = useState(false);
+    const messagesEndRef = useRef(null);
+    const [useRealAI, setUseRealAI] = useState(true); // 是否使用真实 AI
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
+
+    const handleSend = async (prompt) => {
+        if (!prompt || isProcessing) return;
+        
+        const userMessage = { id: Date.now(), text: prompt, isUser: true };
+        setMessages(prev => [...prev, userMessage]);
+        setInput("");
+        setIsProcessing(true);
+
+        try {
+            if (useRealAI) {
+                // 使用真实的 Google Gemini AI
+                const apiKey = import.meta.env.VITE_GOOGLE_AI_API_KEY || 'AIzaSyCGfAnODlgw4YsAP5_XhCUuZJ0OpMlam68';
+                const genAI = new GoogleGenerativeAI(apiKey);
+                const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+                
+                // 构建上下文提示
+                const context = `你是一位专业的大学学业助手，帮助学生管理课程、作业和学习计划。
+学生的当前信息：
+- 在读课程：数据科学与统计 (CHME0007)、健康数据科学原理 (CHME0006)、数据方法与健康研究 (CHME0013)
+- 最近作业：CS Assignment (2天后截止)、数据科学论文 (5天后截止)
+- 最近成绩：数据方法与健康研究 87分、生物统计学 82分
+
+请用友好、专业的语气回答学生的问题。回答要简洁明了，如果涉及具体数据，请引用上述信息。
+
+学生的问题：${prompt}`;
+
+                const result = await model.generateContent(context);
+                const response = await result.response;
+                const aiText = response.text();
+                
+                const aiMessage = { id: Date.now() + 1, text: aiText, isUser: false };
+                setMessages(prev => [...prev, aiMessage]);
+            } else {
+                // 使用 demo 数据
+                setTimeout(() => {
+                    const aiResponse = demoConversations[prompt] || demoConversations["default"];
+                    const aiMessage = { id: Date.now() + 1, text: aiResponse, isUser: false };
+                    setMessages(prev => [...prev, aiMessage]);
+                }, 1000);
+            }
+        } catch (error) {
+            console.error('AI 调用失败:', error);
+            // 如果 AI 调用失败，回退到 demo 数据
+            const aiResponse = demoConversations[prompt] || "抱歉，我暂时无法回答这个问题。请稍后再试。";
+            const aiMessage = { id: Date.now() + 1, text: aiResponse, isUser: false };
+            setMessages(prev => [...prev, aiMessage]);
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+    
+    const categories = [
+        { title: "学业规划", prompt: "我下周的 deadline 有哪些？" },
+        { title: "成绩分析", prompt: "调取一下，另外我想知道我目前的成绩情况" },
+        { title: "校园资源", prompt: "ucl 图书馆几点开门" },
+    ];
+
+    return (
+        <div className="flex flex-col h-full">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white px-4 pt-4">AI 助手</h1>
+            
+            <div className="flex-1 overflow-y-auto space-y-4 p-4">
+                {messages.length === 0 && (
+                    <div className="flex flex-col items-center justify-center h-full text-center p-4">
+                        <div className="p-5 bg-indigo-100 dark:bg-indigo-900/50 rounded-full">
+                            <Sparkles className="w-12 h-12 text-indigo-600 dark:text-indigo-400" />
+                        </div>
+                        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mt-4">我是您的学业助手</h2>
+                        <p className="text-gray-500 dark:text-gray-400">可以问我关于课程、成绩或截止日期的问题。</p>
+                        
+                        <div className="w-full space-y-2 mt-6">
+                            {categories.map(cat => (
+                                <button
+                                    key={cat.title}
+                                    onClick={() => handleSend(cat.prompt)}
+                                    className="w-full p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm text-left transition-transform active:scale-95"
+                                >
+                                    <h3 className="font-medium text-gray-900 dark:text-white">{cat.title}</h3>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate">"{cat.prompt}"</p>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+                
+                {messages.map(msg => (
+                    <div key={msg.id} className={`flex ${msg.isUser ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`max-w-xs lg:max-w-md p-3 rounded-2xl ${msg.isUser ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm'}`}>
+                            <p className="whitespace-pre-wrap text-sm">{msg.text}</p>
+                        </div>
+                    </div>
+                ))}
+                
+                {isProcessing && (
+                    <div className="flex justify-start">
+                        <div className="p-3 rounded-2xl bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 shadow-sm">
+                            <span className="animate-pulse text-sm">正在思考...</span>
+                        </div>
+                    </div>
+                )}
+                <div ref={messagesEndRef} />
+            </div>
+            
+            <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex items-center space-x-2">
+                    <input
+                        type="text"
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleSend(input)}
+                        placeholder="向 AI 助手提问..."
+                        className="flex-1 p-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
+                    />
+                    <button
+                        onClick={() => handleSend(input)}
+                        disabled={isProcessing || input.length === 0}
+                        className="p-3 bg-indigo-600 text-white rounded-lg shadow disabled:bg-gray-400 dark:disabled:bg-gray-600 transition-colors"
+                    >
+                        <Send className="w-5 h-5" />
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
+/**
+ * Page: Email (from StudentEmailView.swift)
+ */
+const Email = () => {
+    const { openModal } = useApp();
+    const [filter, setFilter] = useState("全部");
+    const categories = ["全部", "紧急", "学术", "活动"];
+    
+    const filteredEmails = mockEmails.filter(e => {
+        if (filter === "全部") return true;
+        if (filter === "紧急") return e.category === "Urgent";
+        if (filter === "学术") return e.category === "Academic";
+        if (filter === "活动") return e.category === "Events";
+        return false;
+    });
+
+    return (
+        <div className="space-y-5">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">邮件</h1>
+            
+            {/* Stats */}
+            <div className="p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-sm flex justify-around">
+                <div className="text-center">
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{mockEmails.length}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">总邮件</p>
+                </div>
+                <div className="text-center">
+                    <p className="text-2xl font-bold text-red-500">{mockEmails.filter(e => !e.isRead).length}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">未读</p>
+                </div>
+            </div>
+            
+            {/* Filters */}
+            <div className="flex space-x-2 overflow-x-auto pb-2">
+                {categories.map(cat => (
+                    <button
+                        key={cat}
+                        onClick={() => setFilter(cat)}
+                        className={`py-2 px-4 rounded-full text-sm font-medium transition-all whitespace-nowrap
+                            ${filter === cat 
+                                ? 'bg-indigo-600 text-white' 
+                                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200'}
+                        `}
+                    >
+                        {cat}
+                    </button>
+                ))}
+            </div>
+            
+            {/* Email List */}
+            <div className="space-y-3">
+                {filteredEmails.map(email => (
+                    <EmailRow key={email.id} email={email} onClick={() => openModal('emailDetail', email.id)} />
+                ))}
+            </div>
+        </div>
+    );
+};
+
+// Email Sub-components
+const EmailRow = ({ email, onClick }) => {
+    const categoryStyles = {
+        Urgent: { icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-100 dark:bg-red-900/50' },
+        Academic: { icon: BookOpen, color: 'text-indigo-500', bg: 'bg-indigo-100 dark:bg-indigo-900/50' },
+        Events: { icon: Sparkles, color: 'text-purple-500', bg: 'bg-purple-100 dark:bg-purple-900/50' },
+    };
+    const style = categoryStyles[email.category] || { icon: Mail, color: 'text-gray-500', bg: 'bg-gray-100 dark:bg-gray-700' };
+
+    return (
+        <button onClick={onClick} className="w-full p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-sm text-left flex space-x-4">
+            {!email.isRead && (
+                <div className="w-2 h-2 bg-indigo-500 rounded-full mt-2 flex-shrink-0"></div>
+            )}
+            <div className={`p-3 rounded-full ${style.bg} self-start flex-shrink-0`}>
+                <style.icon className={`w-5 h-5 ${style.color}`} />
+            </div>
+            <div className="flex-1 overflow-hidden">
+                <div className="flex justify-between items-start">
+                    <h3 className={`font-semibold truncate ${email.isRead ? 'text-gray-700 dark:text-gray-300' : 'text-gray-900 dark:text-white'}`}>{email.title}</h3>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap ml-2">{email.date}</span>
+                </div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{email.sender}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300 truncate mt-1">{email.excerpt}</p>
+            </div>
+        </button>
+    );
+};
+
+// --- Settings Page ---
+const SettingsPage = ({ onLogout }) => {
+    const [language, setLanguage] = useState('中文');
+    const [notifications, setNotifications] = useState(true);
+    const [shareGrades, setShareGrades] = useState(true);
+    const [shareCalendar, setShareCalendar] = useState(true);
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+    
+    return (
+        <div className="space-y-5">
+            <h1 className="text-2xl font-bold">设置</h1>
+            
+            {/* 语言设置 */}
+            <div className="space-y-3">
+                <h2 className="text-lg font-semibold">语言设置</h2>
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+                    {['中文', 'English'].map((lang, index) => (
+                        <button
+                            key={lang}
+                            onClick={() => setLanguage(lang)}
+                            className={`w-full flex items-center justify-between p-4 ${
+                                index > 0 ? 'border-t border-gray-100 dark:border-gray-700' : ''
+                            }`}
+                        >
+                            <span className="font-medium">{lang}</span>
+                            {language === lang && (
+                                <Check className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                            )}
+                        </button>
+                    ))}
+                </div>
+            </div>
+            
+            {/* 数据共享 */}
+            <div className="space-y-3">
+                <h2 className="text-lg font-semibold">数据共享</h2>
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 space-y-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                            <GraduationCap className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                            <div>
+                                <div className="font-medium">共享成绩</div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">与家长共享成绩信息</div>
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => setShareGrades(!shareGrades)}
+                            className={`w-12 h-7 rounded-full transition-colors ${
+                                shareGrades ? 'bg-indigo-600' : 'bg-gray-300 dark:bg-gray-600'
+                            } relative`}
+                        >
+                            <div className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-transform ${
+                                shareGrades ? 'translate-x-6' : 'translate-x-1'
+                            }`}></div>
+                        </button>
+                    </div>
+                    
+                    <div className="h-px bg-gray-100 dark:bg-gray-700"></div>
+                    
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                            <Calendar className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                            <div>
+                                <div className="font-medium">共享日程</div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">与家长共享日程安排</div>
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => setShareCalendar(!shareCalendar)}
+                            className={`w-12 h-7 rounded-full transition-colors ${
+                                shareCalendar ? 'bg-indigo-600' : 'bg-gray-300 dark:bg-gray-600'
+                            } relative`}
+                        >
+                            <div className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-transform ${
+                                shareCalendar ? 'translate-x-6' : 'translate-x-1'
+                            }`}></div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            {/* 通知设置 */}
+            <div className="space-y-3">
+                <h2 className="text-lg font-semibold">通知设置</h2>
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                            <Bell className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                            <span className="font-medium">推送通知</span>
+                        </div>
+                        <button
+                            onClick={() => setNotifications(!notifications)}
+                            className={`w-12 h-7 rounded-full transition-colors ${
+                                notifications ? 'bg-indigo-600' : 'bg-gray-300 dark:bg-gray-600'
+                            } relative`}
+                        >
+                            <div className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-transform ${
+                                notifications ? 'translate-x-6' : 'translate-x-1'
+                            }`}></div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            {/* 退出登录 */}
+            <button
+                onClick={() => setShowLogoutConfirm(true)}
+                className="w-full flex items-center justify-center space-x-2 p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl font-semibold hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors border-2 border-red-200 dark:border-red-800"
+            >
+                <User className="w-5 h-5" />
+                <span>退出登录</span>
+            </button>
+            
+            {/* 退出确认弹窗 */}
+            {showLogoutConfirm && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm w-full shadow-xl">
+                        <h3 className="text-xl font-bold mb-4">确认退出登录？</h3>
+                        <p className="text-gray-600 dark:text-gray-300 mb-6">退出后需要重新登录才能使用应用</p>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setShowLogoutConfirm(false)}
+                                className="flex-1 py-2 px-4 bg-gray-200 dark:bg-gray-700 rounded-lg font-medium"
+                            >
+                                取消
+                            </button>
+                            <button
+                                onClick={onLogout}
+                                className="flex-1 py-2 px-4 bg-red-500 text-white rounded-lg font-medium"
+                            >
+                                退出登录
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+// --- Main App Component ---
+
+export default function App({ onLogout }) {
+    return (
+        <AppProvider>
+            <MainApp onLogout={onLogout} />
+        </AppProvider>
+    );
 }
+
+function MainApp({ onLogout }) {
+    const [selectedTab, setSelectedTab] = useState("home");
+    const { activeModal, closeModal } = useApp();
+
+    const renderPage = () => {
+        switch (selectedTab) {
+            case "home":
+                return <Dashboard />;
+            case "academics":
+                return <Academics />;
+            case "calendar":
+                return <CalendarPage />;
+            case "health":
+                return <Health />;
+            case "ai":
+                return <AIAssistant />;
+            case "email":
+                return <Email />;
+            case "settings":
+                return <SettingsPage onLogout={onLogout} />;
+            default:
+                return <Dashboard />;
+        }
+    };
+
+    const renderModal = () => {
+        if (!activeModal) return null;
+
+        let content;
+        switch (activeModal.type) {
+            case 'addTodo':
+                content = <AddTodoModal />;
+                break;
+            case 'appointmentBooking':
+                content = <AppointmentBookingModal />;
+                break;
+            case 'medicalRecords':
+                content = <MedicalRecordsModal />;
+                break;
+            case 'prescriptions':
+                content = <PrescriptionsModal />;
+                break;
+            case 'emailDetail':
+                content = <EmailDetailModal emailId={activeModal.payload} />;
+                break;
+            case 'moduleDetail':
+                content = <ModuleDetailModal moduleId={activeModal.payload} />;
+                break;
+            default:
+                content = <div className="p-4 text-gray-900 dark:text-white">未知弹窗</div>;
+        }
+
+        return <Modal onClose={closeModal}>{content}</Modal>;
+    };
+
+    return (
+        <div className="h-screen w-full flex flex-col font-sans bg-gradient-to-br from-gray-50 to-indigo-50 dark:from-gray-900 dark:to-indigo-900/50 text-gray-900 dark:text-white">
+            {/* Main Content Area */}
+            <main className={`flex-1 overflow-y-auto pb-20 ${selectedTab === 'ai' ? 'p-0' : 'p-4'}`}>
+                {renderPage()}
+            </main>
+
+            {/* Modal Renderer */}
+            {activeModal && renderModal()}
+
+            {/* Bottom Navigation */}
+            <BottomNav 
+                selectedTab={selectedTab} 
+                setSelectedTab={setSelectedTab}
+            />
+        </div>
+    );
+}
+
+// --- Bottom Navigation Component ---
+
+const BottomNav = ({ selectedTab, setSelectedTab }) => {
+    const navItems = [
+        { id: "home", label: "首页", icon: Home },
+        { id: "academics", label: "学业", icon: BookOpen },
+        { id: "calendar", label: "日历", icon: Calendar },
+        { id: "health", label: "健康", icon: Heart },
+        { id: "ai", label: "AI", icon: BrainCircuit },
+        { id: "email", label: "邮件", icon: Mail },
+        { id: "settings", label: "设置", icon: Settings },
+    ];
+
+    return (
+        <nav className="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-t border-gray-200 dark:border-gray-700 shadow-t-lg">
+            <div className="max-w-4xl mx-auto flex justify-around items-center px-2 py-3">
+                {navItems.map(item => (
+                    <button
+                        key={item.id}
+                        onClick={() => setSelectedTab(item.id)}
+                        className={`flex flex-col items-center justify-center w-14 transition-all
+                            ${selectedTab === item.id ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400 hover:text-indigo-500'}
+                        `}
+                    >
+                        <item.icon className="w-6 h-6" />
+                        <span className="text-xs font-medium mt-1">{item.label}</span>
+                    </button>
+                ))}
+            </div>
+        </nav>
+    );
+};
