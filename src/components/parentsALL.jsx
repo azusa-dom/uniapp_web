@@ -1466,7 +1466,7 @@ const ParentAIAssistantView = () => {
         try {
             if (useRealAI) {
                 // 使用真实的 Google Gemini AI
-                const apiKey = import.meta.env.VITE_GOOGLE_AI_API_KEY || 'AIzaSyDgUvUSKMwc5t4apgrWK--00L0du7S10fU';
+                const apiKey = import.meta.env.VITE_GOOGLE_AI_API_KEY || 'AIzaSyDJfTThmo4jGzffO6dmeF8PhYK3GH690gs';
                 const genAI = new GoogleGenerativeAI(apiKey);
                 const model = genAI.getGenerativeModel({ 
                     model: "gemini-pro"
