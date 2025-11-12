@@ -1469,7 +1469,7 @@ const ParentAIAssistantView = () => {
                 const apiKey = import.meta.env.VITE_GOOGLE_AI_API_KEY || 'AIzaSyDJfTThmo4jGzffO6dmeF8PhYK3GH690gs';
                 const genAI = new GoogleGenerativeAI(apiKey);
                 const model = genAI.getGenerativeModel({ 
-                    model: "gemini-pro"
+                    model: "gemini-1.0-pro"
                 });
                 
                 // 构建上下文提示
