@@ -256,6 +256,34 @@ export const healthData = {
     { id: 'H2', title: '日均步数', value: '8,800', unit: '步', status: '活跃', progress: 0.88, icon: Footprints, color: 'green-500' },
     { id: 'H3', title: '总专注时长', value: '142', unit: '小时', status: '非常高效', progress: 0.82, icon: MessageCircle, color: 'blue-500' },
     { id: 'H4', title: '平均压力', value: '低', unit: '', status: '良好', progress: 0.22, icon: Heart, color: 'pink-500' },
+  ],
+  metrics: [
+    { id: 'H1', title: '睡眠时长', value: '7.8', unit: '小时', status: '良好', progress: 0.87, icon: Moon, color: 'indigo-500' },
+    { id: 'H2', title: '今日步数', value: '8,520', unit: '步', status: '活跃', progress: 0.85, icon: Footprints, color: 'green-500' },
+    { id: 'H3', title: '专注时长', value: '5.2', unit: '小时', status: '高效', progress: 0.75, icon: MessageCircle, color: 'blue-500' },
+    { id: 'H4', title: '压力水平', value: '低', unit: '', status: '放松', progress: 0.2, icon: Heart, color: 'pink-500' },
+  ],
+  medicalRecords: [
+    { id: 'MR1', formattedDate: '2025-11-10', type: '常规体检', doctor: 'Dr. Smith', department: '内科', diagnosis: '身体状况良好' },
+    { id: 'MR2', formattedDate: '2025-10-15', type: '疫苗接种', doctor: 'Dr. Johnson', department: '预防医学', diagnosis: '流感疫苗接种完成' },
+    { id: 'MR3', formattedDate: '2025-09-20', type: '牙科检查', doctor: 'Dr. Brown', department: '牙科', diagnosis: '牙齿健康，无需治疗' },
+  ],
+  prescriptions: [
+    { id: 'P1', medicationName: '维生素D', specification: '1000IU', dosage: '每日1片', status: 'active', remainingQuantity: 25, totalQuantity: 30, reminderEnabled: true, reminderTime: '08:00' },
+    { id: 'P2', medicationName: '钙片', specification: '500mg', dosage: '每日2片', status: 'active', remainingQuantity: 15, totalQuantity: 30, reminderEnabled: false, reminderTime: '' },
+    { id: 'P3', medicationName: '抗过敏药', specification: '10mg', dosage: '每日1片', status: 'completed', remainingQuantity: 0, totalQuantity: 10, reminderEnabled: false, reminderTime: '' },
+  ],
+  departments: [
+    { id: 'D1', name: '内科', icon: Heart, color: '#EF4444' },
+    { id: 'D2', name: '外科', icon: Heart, color: '#F59E0B' },
+    { id: 'D3', name: '牙科', icon: Heart, color: '#10B981' },
+    { id: 'D4', name: '眼科', icon: Heart, color: '#3B82F6' },
+  ],
+  doctors: [
+    { id: 'DOC1', name: 'Dr. Smith', title: '主任医师', experience: 15, department: '内科' },
+    { id: 'DOC2', name: 'Dr. Johnson', title: '副主任医师', experience: 12, department: '外科' },
+    { id: 'DOC3', name: 'Dr. Brown', title: '主治医师', experience: 8, department: '牙科' },
+    { id: 'DOC4', name: 'Dr. Davis', title: '医师', experience: 5, department: '眼科' },
   ]
 };
 

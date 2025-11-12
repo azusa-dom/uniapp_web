@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, createContext, useContext } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import ReactMarkdown from 'react-markdown';
 import { 
   Home, 
   BookOpen, 
@@ -1678,7 +1679,7 @@ const AIAssistant = () => {
                 {messages.map(msg => (
                     <div key={msg.id} className={`flex ${msg.isUser ? 'justify-end' : 'justify-start'}`}>
                         <div className={`max-w-xs lg:max-w-md p-3 rounded-2xl ${msg.isUser ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm'}`}>
-                            <p className="whitespace-pre-wrap text-sm">{msg.text}</p>
+                            <ReactMarkdown className="text-sm">{msg.text}</ReactMarkdown>
                         </div>
                     </div>
                 ))}
