@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 // 中英文翻译配置
 export const translations = {
   zh: {
@@ -374,7 +376,7 @@ export const getTranslation = (lang, key, role = 'student') => {
 
 // React Hook for translations
 export const useTranslation = (initialLang = 'zh', role = 'student') => {
-  const [language, setLanguage] = React.useState(initialLang);
+  const [language, setLanguage] = useState(initialLang);
   
   const t = (key) => getTranslation(language, key, role);
   
