@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Users, ArrowRight, Eye, EyeOff, GraduationCap, Heart } from 'lucide-react';
+import { User, Users, ArrowRight, Eye, EyeOff, GraduationCap, Heart, Sparkles } from 'lucide-react';
 
 const LoginView = ({ onLogin }) => {
   const [userType, setUserType] = useState('student'); // 'student' or 'parent'
@@ -8,65 +8,68 @@ const LoginView = ({ onLogin }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
+  const handleDemoLogin = (type) => {
+    setUsername(type === 'student' ? 'zoya.student' : 'zoya.parent');
+    setPassword('password123');
+    onLogin(type);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (username && password) {
-      // 简单验证，实际项目中应该调用 API
       onLogin(userType);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center p-4">
-      {/* 背景装饰 */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-white/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-violet-100 via-purple-100 to-pink-100 flex items-center justify-center p-4 font-sans">
+      {/* 背景模糊形状 */}
+      <div className="absolute top-0 left-0 w-72 h-72 bg-violet-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+      <div className="absolute top-0 right-0 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+      <div className="absolute bottom-20 left-20 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
 
-      {/* 登录卡片 */}
-      <div className="relative w-full max-w-md">
+      <div className="relative w-full max-w-md z-10">
         {/* Logo 和标题 */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-3xl shadow-2xl mb-4">
-            <Heart className="w-10 h-10 text-indigo-600" />
+          <div className="inline-flex items-center justify-center w-24 h-24 bg-white rounded-3xl shadow-2xl mb-4 transform hover:scale-110 transition-transform duration-300">
+            <Sparkles className="w-12 h-12 text-violet-500" />
           </div>
-          <h1 className="text-4xl font-bold text-white mb-2">UniApp</h1>
-          <p className="text-white/80 text-lg">智能校园生活助手</p>
+          <h1 className="text-5xl font-bold text-gray-800 mb-2 tracking-tight">UniApp</h1>
+          <p className="text-gray-500 text-lg">连接校园与家庭的桥梁</p>
         </div>
 
-        {/* 身份切换 */}
-        <div className="bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl p-8">
-          <div className="flex gap-2 p-1 bg-gray-100 rounded-2xl mb-8">
+        {/* 登录卡片 */}
+        <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8">
+          {/* 身份切换 */}
+          <div className="flex gap-2 p-1.5 bg-gray-100 rounded-full mb-8">
             <button
               type="button"
               onClick={() => setUserType('student')}
-              className={`flex-1 flex items-center justify-center space-x-2 py-3 rounded-xl font-semibold transition-all ${
+              className={`flex-1 flex items-center justify-center space-x-2 py-3 rounded-full font-semibold transition-all duration-300 ${
                 userType === 'student'
-                  ? 'bg-indigo-500 text-white shadow-lg scale-105'
+                  ? 'bg-violet-500 text-white shadow-lg'
                   : 'text-gray-600 hover:bg-gray-200'
               }`}
             >
               <GraduationCap className="w-5 h-5" />
-              <span>学生</span>
+              <span>我是学生</span>
             </button>
             <button
               type="button"
               onClick={() => setUserType('parent')}
-              className={`flex-1 flex items-center justify-center space-x-2 py-3 rounded-xl font-semibold transition-all ${
+              className={`flex-1 flex items-center justify-center space-x-2 py-3 rounded-full font-semibold transition-all duration-300 ${
                 userType === 'parent'
-                  ? 'bg-pink-500 text-white shadow-lg scale-105'
+                  ? 'bg-pink-500 text-white shadow-lg'
                   : 'text-gray-600 hover:bg-gray-200'
               }`}
             >
-              <Users className="w-5 h-5" />
-              <span>家长</span>
+              <Heart className="w-5 h-5" />
+              <span>我是家长</span>
             </button>
           </div>
 
           {/* 登录表单 */}
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* 用户名 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {userType === 'student' ? '学号 / 邮箱' : '家长账号 / 手机号'}
@@ -77,14 +80,13 @@ const LoginView = ({ onLogin }) => {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder={userType === 'student' ? '请输入学号或邮箱' : '请输入家长账号或手机号'}
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-indigo-500 transition-colors"
+                  placeholder={userType === 'student' ? '请输入学号或邮箱' : '请输入家长账号'}
+                  className="w-full pl-12 pr-4 py-3 bg-white/50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-violet-400 transition-all"
                   required
                 />
               </div>
             </div>
 
-            {/* 密码 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 密码
@@ -95,7 +97,7 @@ const LoginView = ({ onLogin }) => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="请输入密码"
-                  className="w-full pl-4 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-indigo-500 transition-colors"
+                  className="w-full pl-4 pr-12 py-3 bg-white/50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-violet-400 transition-all"
                   required
                 />
                 <button
@@ -108,75 +110,60 @@ const LoginView = ({ onLogin }) => {
               </div>
             </div>
 
-            {/* 记住我和忘记密码 */}
             <div className="flex items-center justify-between">
-              <label className="flex items-center space-x-2 cursor-pointer">
+              <label className="flex items-center space-x-2 cursor-pointer group">
                 <input
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                  className="w-4 h-4 text-violet-600 border-gray-300 rounded focus:ring-violet-500"
                 />
-                <span className="text-sm text-gray-600">记住我</span>
+                <span className="text-sm text-gray-600 group-hover:text-violet-600">记住我</span>
               </label>
-              <button
-                type="button"
-                className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+              <a
+                href="#"
+                className="text-sm text-violet-600 hover:text-violet-800 font-medium transition-colors"
               >
                 忘记密码？
-              </button>
+              </a>
             </div>
 
-            {/* 登录按钮 */}
             <button
               type="submit"
-              className={`w-full py-3 rounded-xl text-white font-semibold flex items-center justify-center space-x-2 transition-all ${
+              className={`w-full py-3.5 rounded-xl text-white font-semibold flex items-center justify-center space-x-2 transition-all duration-300 transform hover:scale-105 ${
                 userType === 'student'
-                  ? 'bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 shadow-lg hover:shadow-xl'
-                  : 'bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 shadow-lg hover:shadow-xl'
+                  ? 'bg-gradient-to-r from-violet-500 to-purple-600 hover:shadow-xl shadow-lg'
+                  : 'bg-gradient-to-r from-pink-500 to-rose-500 hover:shadow-xl shadow-lg'
               }`}
             >
-              <span>登录</span>
+              <span>安全登录</span>
               <ArrowRight className="w-5 h-5" />
             </button>
           </form>
 
-          {/* 快速登录 / 演示账号 */}
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <p className="text-center text-sm text-gray-600 mb-4">演示账号</p>
-            <div className="grid grid-cols-2 gap-3">
+          <div className="mt-8 pt-6 border-t border-gray-200/80">
+            <p className="text-center text-sm text-gray-500 mb-4">或一键进入演示</p>
+            <div className="grid grid-cols-2 gap-4">
               <button
                 type="button"
-                onClick={() => onLogin('student')}
-                className="px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors text-sm font-medium"
+                onClick={() => handleDemoLogin('student')}
+                className="w-full py-2.5 bg-violet-50 text-violet-600 rounded-lg hover:bg-violet-100 transition-colors text-sm font-medium border border-violet-200"
               >
-                学生端演示
+                学生端
               </button>
               <button
                 type="button"
-                onClick={() => onLogin('parent')}
-                className="px-4 py-2 bg-pink-50 text-pink-600 rounded-lg hover:bg-pink-100 transition-colors text-sm font-medium"
+                onClick={() => handleDemoLogin('parent')}
+                className="w-full py-2.5 bg-pink-50 text-pink-600 rounded-lg hover:bg-pink-100 transition-colors text-sm font-medium border border-pink-200"
               >
-                家长端演示
+                家长端
               </button>
             </div>
           </div>
-
-          {/* 注册链接 */}
-          <div className="mt-6 text-center">
-            <span className="text-sm text-gray-600">还没有账号？</span>
-            <button
-              type="button"
-              className="ml-2 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
-            >
-              立即注册
-            </button>
-          </div>
         </div>
 
-        {/* 页脚 */}
-        <div className="mt-8 text-center text-white/60 text-sm">
-          <p>© 2025 UniApp. All rights reserved.</p>
+        <div className="mt-8 text-center text-gray-400 text-xs">
+          <p>© 2025 UniApp. 保留所有权利。</p>
         </div>
       </div>
     </div>
