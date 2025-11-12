@@ -139,16 +139,16 @@ export const courses = {
 
 // --- 待办事项/作业 (更多作业和任务) ---
 export const todoItems = [
-  { id: 'T01', title: '完成机器学习作业 #3', course: '机器学习入门', dueDate: '2025-12-12', isCompleted: false, priority: 'high' },
-  { id: 'T02', title: '准备数据科学项目报告', course: '数据科学与统计', dueDate: '2025-12-15', isCompleted: false, priority: 'high' },
-  { id: 'T03', title: '复习生物统计学章节 5-7', course: '生物统计学', dueDate: '2025-12-18', isCompleted: false, priority: 'medium' },
-  { id: 'T04', title: '阅读健康数据科学原理的补充材料', course: '健康数据科学原理', dueDate: '2025-12-12', isCompleted: true, priority: 'low' },
-  { id: 'T05', title: '小组会议讨论软件工程最终项目', course: '软件工程导论', dueDate: '2025-11-28', isCompleted: true, priority: 'medium' },
-  { id: 'T06', title: '提交生物统计学论文初稿', course: '生物统计学', dueDate: '2025-12-20', isCompleted: false, priority: 'high' },
-  { id: 'T07', title: '预约论文指导会议 - Dr. Jenkins', course: '生物统计学', dueDate: '2025-11-14', isCompleted: true, priority: 'medium' },
-  { id: 'T08', title: '完成机器学习课后练习题集 #4', course: '机器学习入门', dueDate: '2025-11-16', isCompleted: false, priority: 'medium' },
-  { id: 'T09', title: '归还图书馆书籍', course: '其他', dueDate: '2025-11-15', isCompleted: false, priority: 'low' },
-  { id: 'T10', title: '准备数据科学期中报告演讲稿', course: '数据科学与统计', dueDate: '2025-11-18', isCompleted: true, priority: 'high' },
+  { id: 'T01', title: '完成机器学习作业 #3', course: '机器学习入门', dueDate: new Date('2025-12-12'), isCompleted: false, priority: 'high' },
+  { id: 'T02', title: '准备数据科学项目报告', course: '数据科学与统计', dueDate: new Date('2025-12-15'), isCompleted: false, priority: 'high' },
+  { id: 'T03', title: '复习生物统计学章节 5-7', course: '生物统计学', dueDate: new Date('2025-12-18'), isCompleted: false, priority: 'medium' },
+  { id: 'T04', title: '阅读健康数据科学原理的补充材料', course: '健康数据科学原理', dueDate: new Date('2025-12-12'), isCompleted: true, priority: 'low' },
+  { id: 'T05', title: '小组会议讨论软件工程最终项目', course: '软件工程导论', dueDate: new Date('2025-11-28'), isCompleted: true, priority: 'medium' },
+  { id: 'T06', title: '提交生物统计学论文初稿', course: '生物统计学', dueDate: new Date('2025-12-20'), isCompleted: false, priority: 'high' },
+  { id: 'T07', title: '预约论文指导会议 - Dr. Jenkins', course: '生物统计学', dueDate: new Date('2025-11-14'), isCompleted: true, priority: 'medium' },
+  { id: 'T08', title: '完成机器学习课后练习题集 #4', course: '机器学习入门', dueDate: new Date('2025-11-16'), isCompleted: false, priority: 'medium' },
+  { id: 'T09', title: '归还图书馆书籍', course: '其他', dueDate: new Date('2025-11-15'), isCompleted: false, priority: 'low' },
+  { id: 'T10', title: '准备数据科学期中报告演讲稿', course: '数据科学与统计', dueDate: new Date('2025-11-18'), isCompleted: true, priority: 'high' },
 ];
 
 // --- 日历事件/课程表 (覆盖整个11月和12月初) ---
