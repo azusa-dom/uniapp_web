@@ -2148,7 +2148,7 @@ const AIAssistant = () => {
                 const apiKey = import.meta.env.VITE_GOOGLE_AI_API_KEY || 'AIzaSyDgUvUSKMwc5t4apgrWK--00L0du7S10fU';
                 const genAI = new GoogleGenerativeAI(apiKey);
                 const model = genAI.getGenerativeModel({ 
-                    model: "gemini-1.5-flash-latest"
+                    model: "gemini-pro"
                 });
                 
                 // 构建上下文提示
