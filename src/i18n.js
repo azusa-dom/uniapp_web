@@ -358,7 +358,23 @@ export const getTranslation = (lang, key, role = 'student') => {
   const keys = key.split('.');
   let value = translations[lang];
   
-  // 如果第一个key不是role,则添加role前缀
+  // 先尝试直接查找key(用于通用翻译如home, settings等)
+  let directValue = translations[lang];
+  for (const k of keys) {
+    if (directValue && typeof directValue === 'object') {
+      directValue = directValue[k];
+    } else {
+      directValue = null;
+      break;
+    }
+  }
+  
+  // 如果直接找到了,返回
+  if (directValue) {
+    return directValue;
+  }
+  
+  // 否则尝试添加role前缀查找
   if (keys[0] !== role && keys[0] !== 'student' && keys[0] !== 'parent') {
     keys.unshift(role);
   }
