@@ -139,7 +139,7 @@ const mockEmailDetails = emailDetails;
 // 使用统一的 todoItems
 const mockUpcomingDeadlines = todoItems;
 
-const mockHealthMetrics = healthData.metrics;
+const mockHealthMetrics = healthData;
 const mockMedicalRecords = healthData.medicalRecords;
 const mockPrescriptions = healthData.prescriptions;
 const mockDepartments = healthData.departments;
@@ -1719,6 +1719,139 @@ const AIAssistant = () => {
 
 
 /**
+ * Page: Activities (from iOS ActivitiesView)
+ */
+const ActivitiesPage = () => {
+    const [selectedType, setSelectedType] = useState('全部');
+    
+    const activityTypes = ['全部', '学术竞赛', '学术讲座', '社团活动', '志愿服务', '文化活动', '职业发展', '体育赛事', '学术研讨', '健康活动', '节日活动'];
+    
+    const getTypeColor = (type) => {
+        const colorMap = {
+            '学术竞赛': '#F59E0B',
+            '学术讲座': '#3B82F6',
+            '社团活动': '#8B5CF6',
+            '志愿服务': '#10B981',
+            '文化活动': '#A855F7',
+            '职业发展': '#F59E0B',
+            '体育赛事': '#10B981',
+            '学术研讨': '#6366F1',
+            '健康活动': '#EC4899',
+            '节日活动': '#F97316'
+        };
+        return colorMap[type] || '#6B7280';
+    };
+    
+    const filteredActivities = selectedType === '全部' 
+        ? activities 
+        : activities.filter(activity => activity.type === selectedType);
+
+    return (
+        <div className="space-y-5">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">🎯 校园活动</h1>
+            <p className="text-sm text-gray-600 dark:text-gray-400 -mt-3">发现精彩的UCL校园活动</p>
+            
+            {/* Filter Pills */}
+            <div className="overflow-x-auto -mx-4 px-4">
+                <div className="flex gap-2 pb-2">
+                    {activityTypes.map(type => (
+                        <button
+                            key={type}
+                            onClick={() => setSelectedType(type)}
+                            className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${
+                                selectedType === type
+                                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md'
+                                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:shadow-sm'
+                            }`}
+                        >
+                            {type}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Activities List */}
+            {filteredActivities.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 bg-white dark:bg-gray-800 rounded-2xl shadow-sm">
+                    <div className="w-20 h-20 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center mb-4">
+                        <span className="text-3xl">✨</span>
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-300 font-medium">暂无该类型的活动</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">稍后再来看看吧</p>
+                </div>
+            ) : (
+                <div className="space-y-3">
+                    {filteredActivities.map(activity => (
+                        <ActivityCard key={activity.id} activity={activity} getTypeColor={getTypeColor} />
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
+
+// Activity Card Component
+const ActivityCard = ({ activity, getTypeColor }) => {
+    const IconComponent = activity.icon;
+    const typeColor = getTypeColor(activity.type);
+    
+    return (
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-start gap-4">
+                {/* Time Indicator */}
+                <div className="flex flex-col items-center min-w-[60px]">
+                    <span className="text-base font-bold" style={{ color: typeColor }}>
+                        {activity.startTime}
+                    </span>
+                    <div className="w-0.5 h-5 my-1 bg-gray-300 dark:bg-gray-600"></div>
+                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                        {new Date(activity.date).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })}
+                    </span>
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                        <h3 className="text-base font-semibold text-gray-900 dark:text-white line-clamp-2">
+                            {activity.title}
+                        </h3>
+                        <div 
+                            className="flex items-center justify-center w-10 h-10 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: `${typeColor}20` }}
+                        >
+                            <IconComponent className="w-5 h-5" style={{ color: typeColor }} />
+                        </div>
+                    </div>
+
+                    <span 
+                        className="inline-block text-xs font-medium px-2 py-1 rounded-full mb-3"
+                        style={{ 
+                            color: typeColor,
+                            backgroundColor: `${typeColor}15`
+                        }}
+                    >
+                        {activity.type}
+                    </span>
+
+                    <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                            <MapPin className="w-4 h-4 flex-shrink-0" style={{ color: typeColor }} />
+                            <span className="line-clamp-1">{activity.location}</span>
+                        </div>
+                        <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+                            {activity.description}
+                        </p>
+                    </div>
+                </div>
+
+                {/* Arrow */}
+                <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0 mt-1" />
+            </div>
+        </div>
+    );
+};
+
+/**
  * Page: Email (from StudentEmailView.swift)
  */
 const Email = () => {
@@ -1972,6 +2105,8 @@ function MainApp({ onLogout }) {
                 return <Health />;
             case "ai":
                 return <AIAssistant />;
+            case "activities":
+                return <ActivitiesPage />;
             case "email":
                 return <Email />;
             case "settings":
@@ -2037,6 +2172,7 @@ const BottomNav = ({ selectedTab, setSelectedTab }) => {
         { id: "home", label: "首页", icon: Home },
         { id: "academics", label: "学业", icon: BookOpen },
         { id: "calendar", label: "日历", icon: Calendar },
+        { id: "activities", label: "活动", icon: Sparkles },
         { id: "health", label: "健康", icon: Heart },
         { id: "ai", label: "AI", icon: BrainCircuit },
         { id: "email", label: "邮件", icon: Mail },
