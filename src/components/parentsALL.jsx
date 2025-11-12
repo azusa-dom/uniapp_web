@@ -2398,22 +2398,10 @@ const App = ({ onLogout }) => {
                         onClick={() => setActiveTab('calendar')}
                     />
                     <TabBarButton
-                        icon={Heart}
-                        label={t('health')}
-                        isActive={activeTab === 'health'}
-                        onClick={() => setActiveTab('health')}
-                    />
-                    <TabBarButton
                         icon={Sparkles}
                         label={t('ai')}
                         isActive={activeTab === 'ai'}
                         onClick={() => setActiveTab('ai')}
-                    />
-                    <TabBarButton
-                        icon={Mail}
-                        label={t('email')}
-                        isActive={activeTab === 'mail'}
-                        onClick={() => setActiveTab('mail')}
                     />
                     <TabBarButton
                         icon={Settings}

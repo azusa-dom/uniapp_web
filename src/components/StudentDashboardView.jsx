@@ -899,45 +899,45 @@ const ModuleDetailModal = ({ moduleId }) => {
 /**
  * Page: Dashboard (from StudentDashboardView.swift)
  */
-const Dashboard = () => {
+const Dashboard = ({ t }) => {
     const { openModal, todos } = useApp();
     
     return (
         <div className="space-y-6">
             {/* Header */}
             <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">欢迎, Zoya</h1>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t ? t('student.welcome') : '欢迎'}, Zoya</h1>
                 <p className="text-base text-gray-600 dark:text-gray-400">MSc Health Data Science · Year 1</p>
             </div>
 
             {/* Stats Row */}
             <div className="grid grid-cols-3 gap-3">
-                <StatCard title="即将截止" value={todos.filter(t => !t.isCompleted).length} icon={Clock} color="text-yellow-500" />
-                <StatCard title="今日课程" value={mockTodayClasses.length} icon={BookOpen} color="text-indigo-500" />
-                <StatCard title="待办" value={todos.filter(t => !t.isCompleted).length} icon={CheckCircle} color="text-green-500" />
+                <StatCard title={t ? t('student.upcomingEvents') : '即将截止'} value={todos.filter(t => !t.isCompleted).length} icon={Clock} color="text-yellow-500" />
+                <StatCard title={t ? t('student.today') : '今日课程'} value={mockTodayClasses.length} icon={BookOpen} color="text-indigo-500" />
+                <StatCard title={t ? t('student.todos') : '待办'} value={todos.filter(t => !t.isCompleted).length} icon={CheckCircle} color="text-green-500" />
             </div>
 
             {/* Today's Classes */}
             <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">📚 今日课程</h2>
-                    <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">查看全部</span>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">📚 {t ? t('student.today') : '今日课程'}</h2>
+                    <button className="text-sm font-medium text-indigo-600 dark:text-indigo-400">{t ? t('parent.viewAllActivities') : '查看全部'}</button>
                 </div>
                 {mockTodayClasses.length > 0 ? (
                     <div className="space-y-3">
                         {mockTodayClasses.map(item => <TodayClassCard key={item.id} item={item} />)}
                     </div>
                 ) : (
-                    <EmptyStateCard icon={Check} message="今天没有课程，好好利用这段时间！" />
+                    <EmptyStateCard icon={Check} message={t ? "No classes today" : "今天没有课程，好好利用这段时间！"} />
                 )}
             </div>
             
             {/* Upcoming Deadlines */}
             <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">⏰ 即将截止</h2>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">⏰ {t ? t('student.upcomingEvents') : '即将截止'}</h2>
                     <button onClick={() => openModal('addTodo')} className="text-sm font-medium text-indigo-600 dark:text-indigo-400 flex items-center">
-                        <Plus className="w-4 h-4 mr-1" /> 添加
+                        <Plus className="w-4 h-4 mr-1" /> {t ? 'Add' : '添加'}
                     </button>
                 </div>
                 {todos.filter(t => !t.isCompleted).length > 0 ? (
@@ -947,13 +947,45 @@ const Dashboard = () => {
                         )}
                     </div>
                 ) : (
-                    <EmptyStateCard icon={Check} message="暂无待办事项，所有任务都已完成！" />
+                    <EmptyStateCard icon={Check} message={t ? "All tasks completed!" : "暂无待办事项，所有任务都已完成！"} />
                 )}
+            </div>
+
+            {/* Quick Access Cards */}
+            <div className="grid grid-cols-2 gap-3">
+                <QuickAccessCard 
+                    title={t ? t('email') : '邮件'}
+                    subtitle={`${mockEmails.filter(e => !e.isRead).length} ${t ? 'unread' : '未读'}`}
+                    icon={Mail}
+                    color="bg-gradient-to-br from-blue-500 to-blue-600"
+                    onClick={() => openModal('emailList')}
+                />
+                <QuickAccessCard 
+                    title={t ? t('activities') : '活动'}
+                    subtitle={`${activities.length} ${t ? 'events' : '个活动'}`}
+                    icon={Sparkles}
+                    color="bg-gradient-to-br from-purple-500 to-purple-600"
+                    onClick={() => openModal('activitiesList')}
+                />
+                <QuickAccessCard 
+                    title={t ? t('health') : '健康'}
+                    subtitle={t ? 'View metrics' : '查看数据'}
+                    icon={Heart}
+                    color="bg-gradient-to-br from-pink-500 to-pink-600"
+                    onClick={() => openModal('healthSummary')}
+                />
+                <QuickAccessCard 
+                    title={t ? t('calendar') : '日历'}
+                    subtitle={t ? 'Full schedule' : '完整日程'}
+                    icon={CalendarIcon}
+                    color="bg-gradient-to-br from-indigo-500 to-indigo-600"
+                    onClick={() => console.log('Open calendar')}
+                />
             </div>
             
             {/* Recommendations */}
             <div className="space-y-3">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">✨ 为你推荐</h2>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">✨ {t ? 'Recommended' : '为你推荐'}</h2>
                 <RecommendationCard 
                     title="数据科学研讨会"
                     type="学术"
@@ -1018,6 +1050,17 @@ const DeadlineCard = ({ todo, onClick }) => {
         </button>
     );
 };
+
+const QuickAccessCard = ({ title, subtitle, icon: Icon, color, onClick }) => (
+    <button 
+        onClick={onClick}
+        className={`${color} p-6 rounded-2xl shadow-lg text-white flex flex-col items-start transition-transform hover:scale-105 active:scale-95`}
+    >
+        <Icon className="w-8 h-8 mb-3 opacity-90" />
+        <h3 className="text-lg font-bold mb-1">{title}</h3>
+        <p className="text-sm opacity-90">{subtitle}</p>
+    </button>
+);
 
 const RecommendationCard = ({ title, type, date, location, icon: Icon, color }) => (
     <div className="p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-sm flex items-center space-x-4">
@@ -2105,14 +2148,8 @@ function MainApp({ onLogout }) {
                 return <Academics t={t} />;
             case "calendar":
                 return <CalendarPage t={t} />;
-            case "health":
-                return <Health t={t} />;
             case "ai":
                 return <AIAssistant t={t} />;
-            case "activities":
-                return <ActivitiesPage t={t} />;
-            case "email":
-                return <Email t={t} />;
             case "settings":
                 return <SettingsPage onLogout={onLogout} language={language} setLanguage={setLanguage} t={t} />;
             default:
@@ -2142,6 +2179,15 @@ function MainApp({ onLogout }) {
                 break;
             case 'moduleDetail':
                 content = <ModuleDetailModal moduleId={activeModal.payload} />;
+                break;
+            case 'emailList':
+                content = <Email t={t} />;
+                break;
+            case 'activitiesList':
+                content = <ActivitiesPage t={t} />;
+                break;
+            case 'healthSummary':
+                content = <Health t={t} />;
                 break;
             default:
                 content = <div className="p-4 text-gray-900 dark:text-white">未知弹窗</div>;
@@ -2177,10 +2223,7 @@ const BottomNav = ({ selectedTab, setSelectedTab, t }) => {
         { id: "home", label: t('home'), icon: Home },
         { id: "academics", label: t('academics'), icon: BookOpen },
         { id: "calendar", label: t('calendar'), icon: Calendar },
-        { id: "activities", label: t('activities'), icon: Sparkles },
-        { id: "health", label: t('health'), icon: Heart },
         { id: "ai", label: t('ai'), icon: BrainCircuit },
-        { id: "email", label: t('email'), icon: Mail },
         { id: "settings", label: t('settings'), icon: Settings },
     ];
 
