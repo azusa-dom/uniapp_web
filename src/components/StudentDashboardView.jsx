@@ -134,299 +134,15 @@ const mockEmails = emails;
 
 // 使用统一的 emailDetails
 const mockEmailDetails = emailDetails;
-    {
-        id: 1,
-        name: "数据科学与统计",
-        code: "CHME0007",
-        time: "14:00 - 16:00",
-        location: "Cruciform Building, Room 4.18",
-        lecturer: "Dr. Johnson"
-    },
-    {
-        id: 2,
-        name: "健康数据科学原理",
-        code: "CHME0006",
-        time: "16:30 - 18:30",
-        location: "Foster Court, Lecture Theatre",
-        lecturer: "Prof. Smith"
-    }
-];
 
-const mockUpcomingDeadlines = [
-    {
-        id: "todo-1",
-        title: "CS Assignment",
-        category: "作业",
-        dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
-        priority: "high",
-        isCompleted: false,
-    },
-    {
-        id: "todo-2",
-        title: "数据科学论文",
-        category: "论文",
-        dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
-        priority: "medium",
-        isCompleted: false,
-    },
-];
+// 使用统一的 todoItems
+const mockUpcomingDeadlines = todoItems;
 
-// From StudentAcademicsView
-const mockModules = [
-    {
-        id: "m1",
-        name: "数据方法与健康研究",
-        code: "CHME0013",
-        mark: 87,
-        moduleAverage: 65,
-        assignments: 90,
-        participation: 95,
-        midterm: 85,
-        final: 86,
-        assignmentList: [
-            { id: "a1", name: "数据分析作业", grade: 90, submitted: true, dueDate: "11月1日" },
-            { id: "a2", name: "Python 项目", grade: 88, submitted: true, dueDate: "10月20日" },
-            { id: "a3", name: "统计习题集", grade: 0, submitted: false, dueDate: "11月8日" },
-            { id: "a4", name: "研究设计报告", grade: 0, submitted: false, dueDate: "11月20日" },
-        ],
-        gradeBreakdown: [
-            { component: "作业", weight: 40, grade: 90 },
-            { component: "课堂参与", weight: 10, grade: 95 },
-            { component: "期中考试", weight: 25, grade: 85 },
-            { component: "期末考试", weight: 25, grade: 86 },
-        ]
-    },
-    {
-        id: "m2",
-        name: "数据科学与统计",
-        code: "CHME0007",
-        mark: 72,
-        moduleAverage: 68,
-        assignments: 75,
-        participation: 80,
-        midterm: 68,
-        final: 70,
-        assignmentList: [
-            { id: "a5", name: "回归分析", grade: 75, submitted: true, dueDate: "10月15日" },
-            { id: "a6", name: "统计建模", grade: 0, submitted: false, dueDate: "11月10日" },
-        ],
-        gradeBreakdown: [
-            { component: "作业", weight: 40, grade: 75 },
-            { component: "课堂参与", weight: 10, grade: 80 },
-            { component: "期中考试", weight: 25, grade: 68 },
-            { component: "期末考试", weight: 25, grade: 70 },
-        ]
-    },
-    {
-        id: "m3",
-        name: "健康数据科学原理",
-        code: "CHME0006",
-        mark: 67,
-        moduleAverage: 62,
-        assignments: 70,
-        participation: 75,
-        midterm: 62,
-        final: 65,
-        assignmentList: [
-            { id: "a7", name: "文献综述作业", grade: 76, submitted: true, dueDate: "10月30日" },
-        ],
-        gradeBreakdown: [
-            { component: "作业", weight: 40, grade: 70 },
-            { component: "课堂参与", weight: 10, grade: 75 },
-            { component: "期中考试", weight: 25, grade: 62 },
-            { component: "期末考试", weight: 25, grade: 65 },
-        ]
-    },
-    {
-        id: "m4",
-        name: "深度学习应用",
-        code: "CHME0022",
-        mark: 88,
-        moduleAverage: 75,
-        assignments: 92,
-        participation: 85,
-        midterm: 86,
-        final: 0, // 期末考试未进行
-        assignmentList: [
-            { id: "a8", name: "神经网络基础", grade: 95, submitted: true, dueDate: "10月25日" },
-            { id: "a9", name: "CNN 图像分类", grade: 89, submitted: true, dueDate: "11月5日" },
-            { id: "a10", name: "神经网络项目", grade: 0, submitted: false, dueDate: "11月25日" },
-        ],
-        gradeBreakdown: [
-            { component: "作业", weight: 40, grade: 92 },
-            { component: "课堂参与", weight: 10, grade: 85 },
-            { component: "期中考试", weight: 25, grade: 86 },
-            { component: "期末考试", weight: 25, grade: 0 },
-        ]
-    },
-];
-
-const mockSchedule = [
-    { id: "s1", dayOfWeek: "周一", courseName: "数据方法与健康研究", courseCode: "CHME0013", time: "10:00 - 12:00", location: "Cruciform Building B.3.05", color: "bg-[#6366F1]" },
-    { id: "s2", dayOfWeek: "周二", courseName: "数据科学与统计", courseCode: "CHME0007", time: "14:00 - 16:00", location: "Foster Court 114", color: "bg-[#8B5CF6]" },
-    { id: "s3", dayOfWeek: "周三", courseName: "Python 健康研究编程", courseCode: "CHME0011", time: "09:00 - 11:00", location: "Roberts Building G06", color: "bg-[#10B981]" },
-    { id: "s4", dayOfWeek: "周四", courseName: "医疗人工智能", courseCode: "CHME0016", time: "13:00 - 15:00", location: "Cruciform Building B.4.01", color: "bg-[#EF4444]" },
-    { id: "s5", dayOfWeek: "周五", courseName: "健康数据科学原理", courseCode: "CHME0006", time: "11:00 - 13:00", location: "UCL East Building One 1.03", color: "bg-[#F59E0B]" },
-];
-
-// Calendar events - 与家长端同步的课程数据
-const mockCalendarEvents = [
-    // 今日课程 (11月11日)
-    { 
-        id: 1, 
-        course: '数据科学与统计', 
-        courseCode: 'CHME0007',
-        type: 'lecture', 
-        startTime: new Date(2025, 10, 11, 14, 0), 
-        endTime: new Date(2025, 10, 11, 16, 0), 
-        location: 'Cruciform Building, Room 4.18',
-        lecturer: 'Dr. Johnson'
-    },
-    { 
-        id: 2, 
-        course: '健康数据科学原理', 
-        courseCode: 'CHME0006',
-        type: 'lecture', 
-        startTime: new Date(2025, 10, 11, 16, 30), 
-        endTime: new Date(2025, 10, 11, 18, 30), 
-        location: 'Foster Court, Lecture Theatre',
-        lecturer: 'Prof. Smith'
-    },
-    // 明日课程 (11月12日)
-    { 
-        id: 3, 
-        course: '数据方法与健康研究', 
-        courseCode: 'CHME0013',
-        type: 'lecture', 
-        startTime: new Date(2025, 10, 12, 10, 0), 
-        endTime: new Date(2025, 10, 12, 12, 0), 
-        location: 'Main Building, Room 201',
-        lecturer: 'Dr. Chen'
-    },
-    { 
-        id: 4, 
-        course: '深度学习应用', 
-        courseCode: 'CHME0022',
-        type: 'lecture', 
-        startTime: new Date(2025, 10, 12, 14, 0), 
-        endTime: new Date(2025, 10, 12, 16, 0), 
-        location: 'Computer Lab 3',
-        lecturer: 'Prof. Wang'
-    },
-    // 本周其他课程 (11月13日)
-    { 
-        id: 5, 
-        course: '数据科学与统计', 
-        courseCode: 'CHME0007',
-        type: 'lecture', 
-        startTime: new Date(2025, 10, 13, 14, 0), 
-        endTime: new Date(2025, 10, 13, 16, 0), 
-        location: 'Cruciform Building, Room 4.18',
-        lecturer: 'Dr. Johnson'
-    },
-    { 
-        id: 6, 
-        course: '健康数据科学原理', 
-        courseCode: 'CHME0006',
-        type: 'lecture', 
-        startTime: new Date(2025, 10, 13, 16, 30), 
-        endTime: new Date(2025, 10, 13, 18, 30), 
-        location: 'Foster Court, Lecture Theatre',
-        lecturer: 'Prof. Smith'
-    }
-];
-
-// From StudentEmailView
-const mockEmails = [
-    { id: "e1", title: "紧急：CHME0007 统计建模作业提交提醒", sender: "Dr. Johnson", excerpt: "请注意，统计建模作业将于 11 月 10 日截止...", category: "Urgent", date: "2h ago", isRead: false },
-    { id: "e2", title: "UCL AI Society：本周研讨会", sender: "AI Society", excerpt: "加入我们，与来自 DeepMind 的客座讲师一起探讨...", category: "Events", date: "8h ago", isRead: false },
-    { id: "e3", title: "Re: 小组项目会议时间", sender: "Zhang Wei", excerpt: "大家周三下午 2 点在图书馆见面如何？", category: "Academic", date: "1d ago", isRead: true },
-    { id: "e4", title: "CHME0013 作业已评分：数据分析作业", sender: "UCL Moodle", excerpt: "您的“数据分析作业”已评分。得分：90/100。", category: "Academic", date: "2d ago", isRead: true },
-];
-
-const mockEmailDetails = {
-    "Dr. Johnson": {
-        original: "Dear Student,\n\nThis is a reminder that your assignment '统计建模' for CHME0007 is due on November 10th.\n\nPlease ensure you submit via Moodle before 23:59.\n\nBest,\nDr. Johnson",
-        aiTranslation: "亲爱的同学，\n\n此邮件提醒您，CHME0007 课程的“统计建模”作业将于 11 月 10 日截止。\n\n请确保在 23:59 前通过 Moodle 提交。\n\n祝好，\nDr. Johnson",
-        aiSummary: ["📧 作业提醒：统计建模", "📅 截止日期：11月10日 23:59", "📍 提交方式：Moodle"]
-    },
-    "AI Society": {
-        original: "Hi everyone,\n\nJoin us this Wednesday for an exciting seminar with a guest speaker from DeepMind!\n\nTopic: \"The Future of Large Language Models in Healthcare\"\nSpeaker: Dr. Sarah Chen, Research Scientist at DeepMind\n\nWe'll be discussing:\n- Latest advances in medical LLMs\n- Ethical considerations in AI healthcare\n- Career opportunities in AI research\n\nTime: 6:00 PM - 8:00 PM, Wednesday, November 13th\nLocation: Cruciform Building, Room B.4.01\n\nFree pizza and drinks will be provided! 🍕\n\nPlease RSVP by Monday so we can order enough food.\n\nLooking forward to seeing you there!\n\nBest,\nUCL AI Society Committee",
-        aiTranslation: "大家好，\n\n本周三我们邀请了来自 DeepMind 的客座讲师举办精彩研讨会！\n\n主题：「医疗健康领域的大型语言模型未来」\n演讲者：Dr. Sarah Chen，DeepMind 研究科学家\n\n我们将讨论：\n- 医疗 LLM 的最新进展\n- AI 医疗的伦理考量\n- AI 研究的职业机会\n\n时间：11月13日周三 下午6:00 - 8:00\n地点：Cruciform Building B.4.01 教室\n\n免费提供披萨和饮料！🍕\n\n请在周一前回复，以便我们订购足够的食物。\n\n期待您的参与！\n\nUCL AI Society 委员会",
-        aiSummary: [
-            "📧 活动邀请：AI 研讨会",
-            "🗣️ 演讲者：Dr. Sarah Chen (DeepMind)",
-            "📚 主题：医疗 LLM 的未来",
-            "📅 时间：11月13日周三 6-8 PM",
-            "📍 地点：Cruciform Building B.4.01",
-            "🍕 福利：免费披萨和饮料",
-            "✅ 需要：周一前 RSVP"
-        ]
-    },
-    "Zhang Wei": {
-        original: "Hi everyone,\n\nHope you're all doing well! I wanted to follow up on our group project discussion.\n\nHow about we meet on Wednesday at 2 PM in the library (Level 3, Study Room 7)?\n\nAgenda:\n1. Review project requirements\n2. Divide tasks among team members\n3. Set up our GitHub repository\n4. Plan our next sprint\n\nPlease let me know if this time works for everyone. If not, I can send out a Doodle poll to find a better time.\n\nLooking forward to working with you all!\n\nCheers,\nZhang Wei",
-        aiTranslation: "大家好，\n\n希望大家一切都好！我想跟进一下我们的小组项目讨论。\n\n周三下午 2 点在图书馆见面如何？（3 楼，自习室 7）\n\n议程：\n1. 回顾项目要求\n2. 在团队成员间分配任务\n3. 设置 GitHub 仓库\n4. 规划下一个冲刺\n\n请告诉我这个时间是否适合大家。如果不行，我可以发送 Doodle 投票来找一个更好的时间。\n\n期待与大家合作！\n\n干杯，\nZhang Wei",
-        aiSummary: [
-            "📧 会议邀请：小组项目讨论",
-            "📅 时间：周三下午 2 点",
-            "📍 地点：图书馆3楼自习室7",
-            "📋 议程：回顾要求、分配任务、设置 GitHub、计划冲刺",
-            "💬 需要回复确认时间"
-        ]
-    },
-    "UCL Moodle": {
-        original: "Dear Student,\n\nYour assignment \"Data Analysis Project\" for CHME0013 has been graded.\n\nScore: 90/100\nGrade: A\n\nFeedback from instructor:\n\"Excellent work on the statistical analysis and data visualization. Your interpretation of the results was thorough and well-reasoned. The only area for improvement would be to include more discussion on the limitations of your methodology.\n\nStrengths:\n- Clear and well-structured report\n- Appropriate choice of statistical methods\n- High-quality visualizations\n- Insightful conclusions\n\nAreas for improvement:\n- Discuss methodology limitations\n- Include more references to recent literature\n\nOverall, this is a strong piece of work. Well done!\"\n\nYou can view your detailed feedback and annotated submission on Moodle.\n\nBest regards,\nUCL Moodle System",
-        aiTranslation: "亲爱的同学，\n\n您的 CHME0013 课程作业「数据分析项目」已评分。\n\n分数：90/100\n等级：A\n\n教师反馈：\n「在统计分析和数据可视化方面做得非常出色。您对结果的解释全面且推理充分。唯一需要改进的地方是更多地讨论方法的局限性。\n\n优点：\n- 报告清晰且结构良好\n- 统计方法选择恰当\n- 高质量的可视化\n- 富有洞察力的结论\n\n改进方向：\n- 讨论方法局限性\n- 引用更多近期文献\n\n总体而言，这是一份优秀的作业。做得好！」\n\n您可以在 Moodle 上查看详细反馈和批注的提交内容。\n\n祝好，\nUCL Moodle 系统",
-        aiSummary: [
-            "📧 成绩通知：数据分析项目",
-            "✅ 分数：90/100 (A)",
-            "👍 优点：分析出色、可视化高质量、结论有洞察力",
-            "📝 改进：讨论方法局限性、增加文献引用",
-            "🎉 总评：优秀作业！"
-        ]
-    }
-};
-
-// From StudentHealthView
-const mockHealthMetrics = {
-    day: [
-        { id: "h1", title: "睡眠", value: "7.4", unit: "小时", icon: BedDouble, trend: "up", color: "#6366F1", progress: 0.74, description: "昨晚睡眠 7 小时 24 分，质量良好。建议维持 ≥7h。" },
-        { id: "h2", title: "心率", value: "72", unit: "bpm", icon: HeartPulse, trend: "stable", color: "#EF4444", progress: 0.55, description: "当前静息心率 72 次/分，属正常范围。" },
-        { id: "h3", title: "步数", value: "8,520", unit: "步", icon: Footprints, trend: "up", color: "#10B981", progress: 0.85, description: "今日步数已接近 10,000 步目标。继续加油！" },
-        { id: "h4", title: "压力", value: "中等", unit: "", icon: BrainCircuit, trend: "stable", color: "#F59E0B", progress: 0.50, description: "压力处于可控状态，适当休息避免累积。" }
-    ],
-    week: [
-        { id: "h5", title: "平均睡眠", value: "6.9", unit: "小时", icon: BedDouble, trend: "down", color: "#6366F1", progress: 0.69, description: "近 7 天平均睡眠略低于建议值，尝试提前 30 分钟入睡。" },
-        { id: "h6", title: "平均心率", value: "74", unit: "bpm", icon: HeartPulse, trend: "up", color: "#EF4444", progress: 0.57, description: "静息心率略升高，建议规律运动与充足休息。" },
-        { id: "h7", title: "总步数", value: "52,300", unit: "步", icon: Footprints, trend: "up", color: "#10B981", progress: 0.95, description: "步数活跃度优秀，保持活动水平。" },
-        { id: "h8", title: "压力指数", value: "0.42", unit: "", icon: BrainCircuit, trend: "up", color: "#F59E0B", progress: 0.42, description: "压力略升，适度放松。" }
-    ],
-};
-
-const mockMedicalRecords = [
-    { id: "r1", formattedDate: "2025年10月20日", type: "普通门诊", doctor: "Dr. Smith", department: "全科", diagnosis: "上呼吸道感染", prescription: ["阿莫西林", "布洛芬"], advice: "多喝水，注意休息。" },
-    { id: "r2", formattedDate: "2025年9月15日", type: "皮肤科", doctor: "Dr. Lee", department: "皮肤科", diagnosis: "湿疹", prescription: ["氢化可的松乳膏"], advice: "保持皮肤湿润，避免刺激物。" },
-];
-
-const mockPrescriptions = [
-    { id: "p1", medicationName: "阿莫西林", specification: "250mg", dosage: "每日 3 次，每次 1 粒", status: "completed", prescribedBy: "Dr. Smith", prescriptionDate: new Date("2025-10-20"), validUntil: new Date("2025-10-27"), remainingQuantity: 0, totalQuantity: 21, reminderEnabled: false, notes: "饭后服用。" },
-    { id: "p2", medicationName: "布洛芬", specification: "200mg", dosage: "需要时服用，缓解疼痛", status: "active", prescribedBy: "Dr. Smith", prescriptionDate: new Date("2025-10-20"), validUntil: new Date("2026-10-20"), remainingQuantity: 15, totalQuantity: 20, reminderEnabled: false, notes: "发烧或疼痛时服用。" },
-    { id: "p3", medicationName: "氢化可的松乳膏", specification: "1%", dosage: "每日 2 次，涂抹患处", status: "active", prescribedBy: "Dr. Lee", prescriptionDate: new Date("2025-09-15"), validUntil: new Date("2026-09-15"), remainingQuantity: 1, totalQuantity: 1, reminderEnabled: true, reminderTime: "09:00", notes: "仅限外用。" },
-];
-
-const mockDepartments = [
-    { id: "d1", name: "全科", icon: HeartPulse, color: "6366F1" },
-    { id: "d2", name: "骨科", icon: User, color: "10B981" }, // Placeholder icon
-    { id: "d3", name: "内科", icon: FileText, color: "F59E0B" }, // Placeholder icon
-    { id: "d4", name: "皮肤科", icon: User, color: "EC4899" }, // Placeholder icon
-    { id: "d5", name: "眼科", icon: Eye, color: "8B5CF6" }, // Placeholder icon
-];
-
-const mockDoctors = [
-    { id: "doc1", name: "Dr. Smith", title: "全科医生", specialization: "全科", experience: 10, available: true, department: "全科" },
-    { id: "doc2", name: "Dr. Lee", title: "皮肤科专家", specialization: "皮肤科", experience: 8, available: true, department: "皮肤科" },
-    { id: "doc3", name: "Dr. Wilson", title: "全科医生", specialization: "全科", experience: 15, available: false, department: "全科" },
-];
+const mockHealthMetrics = healthData.metrics;
+const mockMedicalRecords = healthData.medicalRecords;
+const mockPrescriptions = healthData.prescriptions;
+const mockDepartments = healthData.departments;
+const mockDoctors = healthData.doctors;
 
 // From StudentAIAssistantView
 const demoConversations = {
@@ -1445,13 +1161,13 @@ const StudentMonthView = ({ selectedDate, setSelectedDate, events }) => {
         <div className="space-y-3">
             <div className="flex justify-between items-center px-2">
                 <button onClick={() => changeMonth(-1)} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <ChevronLeft size={20} className="text-indigo-600 dark:text-indigo-400" />
+                    <ChevronLeft size={20} className="text-violet-600 dark:text-violet-400" />
                 </button>
                 <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
                     {currentMonth.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' })}
                 </h4>
                 <button onClick={() => changeMonth(1)} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <ChevronRight size={20} className="text-indigo-600 dark:text-indigo-400" />
+                    <ChevronRight size={20} className="text-violet-600 dark:text-violet-400" />
                 </button>
             </div>
             <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
@@ -1471,7 +1187,7 @@ const StudentMonthView = ({ selectedDate, setSelectedDate, events }) => {
                             key={day}
                             onClick={() => setSelectedDate(dayDate)}
                             className={`h-20 w-full rounded-lg p-1 flex flex-col items-center justify-start ${
-                                isSelected ? 'bg-gradient-to-br from-indigo-500 to-indigo-600 text-white ring-2 ring-indigo-400' : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                                isSelected ? 'bg-gradient-to-br from-violet-500 to-violet-600 text-white ring-2 ring-violet-400' : 'hover:bg-gray-100 dark:hover:bg-gray-700'
                             }`}
                         >
                             <span className={`text-xs font-semibold ${isSelected ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
@@ -1483,7 +1199,7 @@ const StudentMonthView = ({ selectedDate, setSelectedDate, events }) => {
                                         <div 
                                             key={event.id} 
                                             className={`text-[9px] leading-tight px-1 py-0.5 rounded ${
-                                                isSelected ? 'bg-white/30 text-white' : 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200'
+                                                isSelected ? 'bg-white/30 text-white' : 'bg-violet-100 text-violet-700 dark:bg-violet-900 dark:text-violet-200'
                                             } truncate`}
                                             title={`${event.course} ${new Date(event.startTime).toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})}`}
                                         >
@@ -1491,7 +1207,7 @@ const StudentMonthView = ({ selectedDate, setSelectedDate, events }) => {
                                         </div>
                                     ))}
                                     {dayEvents.length > 2 && (
-                                        <div className={`text-[9px] font-medium ${isSelected ? 'text-white/80' : 'text-indigo-600 dark:text-indigo-400'}`}>
+                                        <div className={`text-[9px] font-medium ${isSelected ? 'text-white/80' : 'text-violet-600 dark:text-violet-400'}`}>
                                             +{dayEvents.length - 2}
                                         </div>
                                     )}
@@ -1526,7 +1242,7 @@ const StudentWeekView = ({ selectedDate, setSelectedDate, events }) => {
                             key={day.toISOString()}
                             onClick={() => setSelectedDate(day)}
                             className={`flex-1 flex flex-col items-center space-y-1 p-2 rounded-lg ${
-                                isSelected ? 'bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-lg shadow-indigo-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                                isSelected ? 'bg-gradient-to-br from-violet-500 to-violet-600 text-white shadow-lg shadow-violet-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'
                             }`}
                         >
                             <span className="text-xs">{day.toLocaleDateString('zh-CN', { weekday: 'short' })}</span>
@@ -1534,7 +1250,7 @@ const StudentWeekView = ({ selectedDate, setSelectedDate, events }) => {
                                 {day.getDate()}
                             </span>
                             {dayEvents.length > 0 && (
-                                <div className={`text-[10px] font-medium ${isSelected ? 'text-white' : 'text-indigo-600 dark:text-indigo-400'}`}>
+                                <div className={`text-[10px] font-medium ${isSelected ? 'text-white' : 'text-violet-600 dark:text-violet-400'}`}>
                                     {dayEvents.length}节课
                                 </div>
                             )}
@@ -1554,7 +1270,7 @@ const StudentWeekView = ({ selectedDate, setSelectedDate, events }) => {
                         return (
                             <div
                                 key={event.id}
-                                className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 border-l-4 border-indigo-500 rounded-lg p-3 hover:shadow-md transition-shadow"
+                                className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/50 border-l-4 border-violet-500 rounded-lg p-3 hover:shadow-md transition-shadow"
                             >
                                 <div className="flex justify-between items-start">
                                     <div className="flex-1">
@@ -1572,7 +1288,7 @@ const StudentWeekView = ({ selectedDate, setSelectedDate, events }) => {
                                             </span>
                                         </div>
                                     </div>
-                                    <div className="px-2 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-200 rounded text-xs font-medium">
+                                    <div className="px-2 py-1 bg-violet-100 dark:bg-violet-900 text-violet-700 dark:text-violet-200 rounded text-xs font-medium">
                                         {event.courseCode}
                                     </div>
                                 </div>
@@ -1606,8 +1322,8 @@ const StudentDayView = ({ selectedDate, setSelectedDate, events }) => {
     return (
         <div className="space-y-4">
             <div className="flex justify-between items-center px-2">
-                <button onClick={() => changeDay(-1)} className="p-3 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-900">
-                    <ChevronLeft size={22} className="text-indigo-600 dark:text-indigo-400" />
+                <button onClick={() => changeDay(-1)} className="p-3 rounded-full hover:bg-violet-100 dark:hover:bg-violet-900">
+                    <ChevronLeft size={22} className="text-violet-600 dark:text-violet-400" />
                 </button>
                 <div className="text-center">
                     <p className="text-4xl font-bold text-gray-900 dark:text-white">{selectedDate.getDate()}</p>
@@ -1615,8 +1331,8 @@ const StudentDayView = ({ selectedDate, setSelectedDate, events }) => {
                         {selectedDate.toLocaleDateString('zh-CN', { month: 'long', weekday: 'long' })}
                     </p>
                 </div>
-                <button onClick={() => changeDay(1)} className="p-3 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-900">
-                    <ChevronRight size={22} className="text-indigo-600 dark:text-indigo-400" />
+                <button onClick={() => changeDay(1)} className="p-3 rounded-full hover:bg-violet-100 dark:hover:bg-violet-900">
+                    <ChevronRight size={22} className="text-violet-600 dark:text-violet-400" />
                 </button>
             </div>
             
@@ -1648,7 +1364,7 @@ const StudentDayView = ({ selectedDate, setSelectedDate, events }) => {
                                     return (
                                         <div
                                             key={event.id}
-                                            className="mb-1 p-2 rounded-lg bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900/50 dark:to-purple-900/50 border-l-4 border-indigo-500 hover:shadow-md transition-shadow"
+                                            className="mb-1 p-2 rounded-lg bg-gradient-to-r from-violet-100 to-purple-100 dark:from-violet-900/50 dark:to-purple-900/50 border-l-4 border-violet-500 hover:shadow-md transition-shadow"
                                         >
                                             <div className="font-semibold text-sm text-gray-900 dark:text-white">{event.course}</div>
                                             <div className="text-xs text-gray-600 dark:text-gray-300 mt-0.5">{event.courseCode}</div>
@@ -1704,7 +1420,7 @@ const CalendarPage = () => {
         <div className="space-y-5">
             <div className="flex justify-between items-center">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white">日历</h1>
-                <button className="p-2 bg-indigo-600 text-white rounded-full shadow hover:bg-indigo-700">
+                <button className="p-2 bg-violet-600 text-white rounded-full shadow hover:bg-violet-700">
                     <Plus className="w-5 h-5" />
                 </button>
             </div>
@@ -1750,13 +1466,13 @@ const CalendarPage = () => {
 const ModernEventCard = ({ event }) => (
     <div className="p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-sm flex space-x-3">
         <div className="flex flex-col items-center w-16 text-center flex-shrink-0">
-            <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400">{event.startTime}</span>
+            <span className="text-sm font-bold text-violet-600 dark:text-violet-400">{event.startTime}</span>
             <div className="h-6 w-0.5 bg-gray-200 dark:bg-gray-700 my-1"></div>
             <span className="text-xs text-gray-500 dark:text-gray-400">{event.endTime}</span>
         </div>
         <div className="flex-1 overflow-hidden">
             <div className="flex items-center space-x-2 mb-1">
-                <span className={`py-0.5 px-2 text-xs font-medium rounded-full ${event.type === '课程' ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300' : 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300'}`}>
+                <span className={`py-0.5 px-2 text-xs font-medium rounded-full ${event.type === '课程' ? 'bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300' : 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300'}`}>
                     {event.type}
                 </span>
                 {event.courseCode && (
@@ -1767,9 +1483,9 @@ const ModernEventCard = ({ event }) => (
             </div>
             <h3 className="font-semibold text-gray-900 dark:text-white truncate">{event.title}</h3>
             {event.lecturer && (
-                <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">{event.lecturer}</p>
+                <p className="text-xs text-gray-600 dark:text-gray-300 mt-0.5">{event.lecturer}</p>
             )}
-            <div className="flex items-center space-x-1 mt-1">
+            <div className="flex items-center space-x-1 mt-1 text-xs text-gray-500 dark:text-gray-400">
                 <MapPin size={12} className="text-gray-400" />
                 <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{event.location}</p>
             </div>
@@ -1815,12 +1531,6 @@ const Health = () => {
             <div className="p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-sm space-y-3">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">健康建议</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-300 flex items-start">
-                    <span className="mr-2 mt-1">💡</span>
-                    保持 7-9 小时睡眠可提升认知与记忆力。
-                </p>
-                <p className="text-sm text-gray-600 dark:text-gray-300 flex items-start">
-                    <span className="mr-2 mt-1">💡</span>
-                    每天 30 分钟中强度运动有助缓解压力。
                 </p>
             </div>
         </div>

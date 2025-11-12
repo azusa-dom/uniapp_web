@@ -53,161 +53,34 @@ import {
     // BookClosed // Removed this icon
 } from 'lucide-react';
 
-// --- 数据模拟 ---
-// 基于 ParentTodoView 和 ParentDashboardView
-const mockTodoItems = [
-    {
-        id: '1',
-        title: 'CS Assignment',
-        dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 天后
-        priority: 'high',
-        category: '作业',
-        notes: '完成关于机器学习算法的报告。',
-        isCompleted: false,
-        source: 'Canvas'
-    },
-    {
-        id: '2',
-        title: '数据分析作业',
-        dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 天后
-        priority: 'medium',
-        category: '作业',
-        notes: '分析健康数据集并提交报告。',
-        isCompleted: false,
-        source: 'Moodle'
-    },
-    {
-        id: '3',
-        title: 'Python 项目',
-        dueDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 已过期
-        priority: 'urgent',
-        category: '项目',
-        notes: '期末项目。',
-        isCompleted: false,
-        source: '教授邮件'
-    },
-    {
-        id: '4',
-        title: '阅读论文',
-        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-        priority: 'low',
-        category: '阅读',
-        notes: '阅读关于 AI 医疗的最新论文。',
-        isCompleted: false,
-        source: '个人'
-    },
-    {
-        id: '5',
-        title: '小组会议',
-        dueDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
-        priority: 'medium',
-        category: '会议',
-        notes: '',
-        isCompleted: false,
-        source: '同学'
-    },
-    {
-        id: '6',
-        title: '完成上周笔记',
-        dueDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-        priority: 'medium',
-        category: '复习',
-        notes: '',
-        isCompleted: true,
-        source: '个人'
-    }
-];
+// 统一从 mockData 导入数据，确保学生端与家长端一致
+import {
+    courses,
+    calendarEvents as sharedCalendarEvents,
+    activities as sharedActivities,
+    emails as sharedEmails,
+    emailDetails as sharedEmailDetails,
+    todoItems as sharedTodoItems,
+} from '../mockData';
 
-// 基于 ParentEmail.swift 和 StudentEmailView.swift
-// 我们将使用 StudentEmailView.swift 中的 mock 数据结构
-const mockEmails = [
-    { 
-        id: '1', 
-        title: 'Academic Progress Report: CHME0017', 
-        sender: 'UCL Academic Office', 
-        excerpt: 'Your final grade is 85 (Distinction). Please check your student portal...', 
-        date: '3天前', 
-        category: 'Academic', 
-        isRead: false 
-    },
-    { 
-        id: '2', 
-        title: 'URGENT: Campus Security Alert', 
-        sender: 'UCL Security', 
-        excerpt: 'This is an urgent security alert regarding recent incidents near campus...', 
-        date: '1天前', 
-        category: 'Urgent', 
-        isRead: false 
-    },
-    { 
-        id: '3', 
-        title: 'Invitation: AI Hackathon', 
-        sender: 'CS Department', 
-        excerpt: 'We are excited to invite you to the annual AI Hackathon this month...', 
-        date: '2天前', 
-        category: 'Events', 
-        isRead: true 
-    },
-    { 
-        id: '4', 
-        title: 'Academic Progress Report: CHME0008', 
-        sender: 'UCL Academic Office', 
-        excerpt: 'Your final grade is 69 (Merit). Please check your student portal...', 
-        date: '3天前', 
-        category: 'Academic', 
-        isRead: true 
-    },
-    { 
-        id: '5', 
-        title: 'Weekly Sports Summary', 
-        sender: 'Student Union', 
-        excerpt: 'Thanks for participating in the 5K run last week...', 
-        date: '4天前', 
-        category: 'Events', 
-        isRead: true 
-    },
-];
+// --- 数据模拟（改为统一来源） ---
+// 基于 Student 侧的 todoItems 转换为家长视图所需结构
+const mockTodoItems = sharedTodoItems.map(t => ({
+    id: t.id,
+    title: t.title,
+    dueDate: t.dueDate ? new Date(t.dueDate) : null,
+    priority: t.priority || 'medium',
+    category: t.course || '作业',
+    notes: t.notes || '',
+    isCompleted: !!t.isCompleted,
+    source: '学生端'
+}));
 
-// 基于 EmailDetailView.swift 的 AI 总结数据
-const mockEmailDetails = {
-    'UCL Academic Office': {
-        original: `Dear Student,\n\nThis is a notification regarding your academic progress in module CHME0017 (Advanced Machine Learning for Healthcare).\n\nYour final grade is 85 (Distinction).\n\nPlease check your student portal for a full breakdown.\n\nBest regards,\nUCL Academic Office`,
-        aiTranslation: `亲爱的同学，\n\n这是一封关于您在 CHME0017（医疗高级机器学习）课程中学业进展的通知。\n\n您的最终成绩是 85 分（Distinction）。\n\n请登录学生门户查看详细信息。\n\n此致，\nUCL学术办公室`,
-        aiSummary: [
-            "📧 课程成绩通知",
-            "🎓 课程: CHME0017 医疗高级机器学习",
-            "✅ 最终成绩: 85 (Distinction)",
-            "🔍 登录学生门户查看详情"
-        ]
-    },
-    'UCL Security': {
-        original: `Dear All,\n\nThis is an urgent security alert regarding recent incidents near campus. Please be aware of your surroundings, especially after dark.\n\nReport any suspicious activity immediately.\n\nBest regards,\nUCL Security`,
-        aiTranslation: `全体人员，\n\n这是一份关于最近校园附近事件的紧急安全警报。请注意您周围的环境，尤其是在天黑后。\n\n立即报告任何可疑活动。\n\n此致，\nUCL安全部门`,
-        aiSummary: [
-            "🚨 紧急安全警报",
-            "🌙 夜间请特别注意周围环境",
-            "📞 立即报告可疑活动"
-        ]
-    },
-    'CS Department': {
-        original: `Hello Students,\n\nWe are excited to invite you to the annual AI Hackathon this month. This is a great opportunity to build something amazing and network with industry experts.\n\nDate: Nov 25-26\nLocation: Student Centre\n\nSign up now!\n\nCS Department`,
-        aiTranslation: `同学们好，\n\n我们很高兴邀请您参加本月举行的年度 AI 黑客马拉松。这是一个创造卓越并与行业专家交流的绝佳机会。\n\n日期：11月25-26日\n地点：学生中心\n\n立即报名！\n\nCS 部门`,
-        aiSummary: [
-            "🎉 活动邀请: AI Hackathon",
-            "📅 日期: 11月25-26日",
-            "📍 地点: 学生中心",
-            "🔗 邀请学生报名参加"
-        ]
-    },
-    'Student Union': {
-        original: `Hi Zoya,\n\nThanks for participating in the 5K run last week! We hope you enjoyed it. \n\nCheck out this week's events...\n\nBest,\nStudent Union`,
-        aiTranslation: `嗨 Zoya，\n\n感谢你上周参加 5K 跑活动！希望你玩得开心。\n\n看看本周的活动...\n\n祝好，\n学生会`,
-        aiSummary: [
-            "🏃‍♀️ 感谢参加 5K 跑",
-            "📅 查看本周新活动"
-        ]
-    }
-};
+// 邮件改为统一来源
+const mockEmails = sharedEmails;
+
+// 邮件详情改为统一来源
+const mockEmailDetails = sharedEmailDetails;
 
 // Mock 健康数据
 const mockHealthData = {
@@ -231,185 +104,53 @@ const mockHealthData = {
     ]
 };
 
-// Mock 学业数据
-// 与学生端同步的课程数据
-const mockCompletedCourses = [
-    { 
-        code: 'CHME0011', 
-        name: '生物统计学', 
-        finalGrade: 82, 
-        credit: 15, 
-        semester: '2024秋季',
-        lecturer: 'Dr. Williams',
-        assignments: 85,
-        midterm: 80,
-        final: 81
-    },
-    { 
-        code: 'CHME0016', 
-        name: '机器学习基础', 
-        finalGrade: 91, 
-        credit: 15, 
-        semester: '2024秋季',
-        lecturer: 'Prof. Lee',
-        assignments: 95,
-        midterm: 88,
-        final: 90
-    },
-    { 
-        code: 'CHME0018', 
-        name: '统计建模', 
-        finalGrade: 78, 
-        credit: 15, 
-        semester: '2025春季',
-        lecturer: 'Dr. Brown',
-        assignments: 80,
-        midterm: 75,
-        final: 78
-    }
-];
+// 学业数据：从统一 courses.completed 映射
+const mockCompletedCourses = courses.completed.map(c => {
+    const findScore = (label) => c.components?.find(x => x.name.includes(label))?.score ?? null;
+    const assignments = findScore('作业') ?? findScore('项目') ?? c.components?.[0]?.score ?? null;
+    const midterm = findScore('期中') ?? null;
+    const final = findScore('期末') ?? c.components?.slice(-1)?.[0]?.score ?? null;
+    return {
+        code: c.code,
+        name: c.name,
+        finalGrade: c.finalGrade,
+        credit: c.credit,
+        semester: c.semester,
+        lecturer: c.lecturer || '授课教师',
+        assignments,
+        midterm,
+        final,
+    };
+});
 
-const mockOngoingCourses = [
-    {
-        code: 'CHME0013',
-        name: '数据方法与健康研究',
-        currentGrade: 87,
-        credit: 15,
-        lecturer: 'Dr. Chen',
-        progress: 75,
-        nextDeadline: '11月20日 - 研究设计报告'
-    },
-    {
-        code: 'CHME0007',
-        name: '数据科学与统计',
-        currentGrade: 72,
-        credit: 15,
-        lecturer: 'Dr. Johnson',
-        progress: 60,
-        nextDeadline: '11月10日 - 统计建模作业'
-    },
-    {
-        code: 'CHME0006',
-        name: '健康数据科学原理',
-        currentGrade: 85,
-        credit: 15,
-        lecturer: 'Prof. Smith',
-        progress: 70,
-        nextDeadline: '11月15日 - 期中考试'
-    },
-    {
-        code: 'CHME0022',
-        name: '深度学习应用',
-        currentGrade: 88,
-        credit: 15,
-        lecturer: 'Prof. Wang',
-        progress: 50,
-        nextDeadline: '11月25日 - 神经网络项目'
-    }
-];
+// 进行中课程：从统一 courses.ongoing 映射
+const mockOngoingCourses = courses.ongoing.map(c => ({
+    code: c.code,
+    name: c.name,
+    currentGrade: typeof c.currentGrade === 'string' ? parseInt(c.currentGrade) || 0 : c.currentGrade,
+    credit: c.credit ?? 15,
+    lecturer: c.lecturer,
+    progress: c.progress ?? 0,
+    nextDeadline: c.nextDeadline || ''
+}));
 
-// Mock 日历事件数据 - 与学生端课程同步
-const mockCalendarEvents = [
-    // 今日课程 (11月11日)
-    { 
-        id: 1, 
-        course: '数据科学与统计', 
-        courseCode: 'CHME0007',
-        type: 'lecture', 
-        startTime: new Date(2025, 10, 11, 14, 0), 
-        endTime: new Date(2025, 10, 11, 16, 0), 
-        location: 'Cruciform Building, Room 4.18',
-        lecturer: 'Dr. Johnson'
-    },
-    { 
-        id: 2, 
-        course: '健康数据科学原理', 
-        courseCode: 'CHME0006',
-        type: 'lecture', 
-        startTime: new Date(2025, 10, 11, 16, 30), 
-        endTime: new Date(2025, 10, 11, 18, 30), 
-        location: 'Foster Court, Lecture Theatre',
-        lecturer: 'Prof. Smith'
-    },
-    // 明日课程 (11月12日)
-    { 
-        id: 3, 
-        course: '数据方法与健康研究', 
-        courseCode: 'CHME0013',
-        type: 'lecture', 
-        startTime: new Date(2025, 10, 12, 10, 0), 
-        endTime: new Date(2025, 10, 12, 12, 0), 
-        location: 'Main Building, Room 201',
-        lecturer: 'Dr. Chen'
-    },
-    { 
-        id: 4, 
-        course: '深度学习应用', 
-        courseCode: 'CHME0022',
-        type: 'lecture', 
-        startTime: new Date(2025, 10, 12, 14, 0), 
-        endTime: new Date(2025, 10, 12, 16, 0), 
-        location: 'Computer Lab 3',
-        lecturer: 'Prof. Wang'
-    },
-    // 本周其他课程 (11月13日)
-    { 
-        id: 5, 
-        course: '数据科学与统计', 
-        courseCode: 'CHME0007',
-        type: 'lecture', 
-        startTime: new Date(2025, 10, 13, 14, 0), 
-        endTime: new Date(2025, 10, 13, 16, 0), 
-        location: 'Cruciform Building, Room 4.18',
-        lecturer: 'Dr. Johnson'
-    },
-    { 
-        id: 6, 
-        course: '健康数据科学原理', 
-        courseCode: 'CHME0006',
-        type: 'lecture', 
-        startTime: new Date(2025, 10, 13, 16, 30), 
-        endTime: new Date(2025, 10, 13, 18, 30), 
-        location: 'Foster Court, Lecture Theatre',
-        lecturer: 'Prof. Smith'
-    }
-];
+// 日历事件：从统一 calendarEvents 映射，并转换为 Date 对象
+const mockCalendarEvents = sharedCalendarEvents.map(e => ({
+    ...e,
+    id: e.id,
+    startTime: new Date(e.startTime),
+    endTime: new Date(e.endTime),
+}));
 
-// Mock 校园活动数据
-const mockActivities = [
-    {
-        id: 1,
-        title: 'AI 研讨会',
-        date: new Date(2025, 10, 11, 18, 0),
-        location: 'Online',
-        category: '学术',
-        description: '探讨人工智能在医疗健康领域的应用'
-    },
-    {
-        id: 2,
-        title: '数学竞赛小组',
-        date: new Date(2025, 10, 12, 17, 0),
-        location: 'Mathematics Building',
-        category: '竞赛',
-        description: '每周数学竞赛培训'
-    },
-    {
-        id: 3,
-        title: '图书馆志愿服务',
-        date: new Date(2025, 10, 13, 15, 0),
-        location: 'Main Library',
-        category: '志愿者',
-        description: '协助图书整理和学生咨询'
-    },
-    {
-        id: 4,
-        title: '校园科技展览会',
-        date: new Date(2025, 10, 14, 13, 0),
-        location: 'Student Union Hall',
-        category: '展览',
-        description: '学生科技创新项目展示'
-    }
-];
+// 校园活动：从统一 activities 映射
+const mockActivities = sharedActivities.map(a => ({
+    id: a.id,
+    title: a.title,
+    date: a.date ? new Date(`${a.date}T${a.startTime || '00:00'}`) : new Date(),
+    location: a.location,
+    category: a.type || '活动',
+    description: a.description,
+}));
 
 
 // --- 辅助 Hook 和函数 ---
