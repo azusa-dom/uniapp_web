@@ -47,14 +47,93 @@ import {
   AlertTriangle,
   Star,
   GraduationCap,
-  Eye // Added Eye icon
+  Eye,
+  Book
 } from 'lucide-react';
 
-// --- Mock Data ---
-// Extracted from Swift ViewModels and DataManagers
+// 从统一数据源导入
+import { 
+  studentInfo,
+  courses, 
+  todoItems, 
+  calendarEvents, 
+  activities, 
+  emails, 
+  emailDetails, 
+  healthData 
+} from '../mockData';
 
-// From StudentDashboardView
-const mockTodayClasses = [
+// --- Mock Data ---
+// 从 calendarEvents 生成今日课程
+const today = new Date();
+const mockTodayClasses = calendarEvents
+  .filter(e => new Date(e.startTime).toDateString() === today.toDateString())
+  .map(e => ({
+    id: e.id,
+    name: e.course,
+    code: e.courseCode,
+    time: `${new Date(e.startTime).toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})} - ${new Date(e.endTime).toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})}`,
+    location: e.location
+  }));
+
+// 将 courses 数据转换为 modules 格式（学生端使用）
+const mockModules = [
+  ...courses.completed.map(c => ({
+    id: c.id,
+    code: c.code,
+    name: c.name,
+    semester: c.semester,
+    credit: c.credit,
+    mark: c.finalGrade,
+    gradeBreakdown: c.components.map(comp => ({
+      component: comp.name,
+      weight: comp.percentage,
+      grade: comp.score
+    })),
+    assignmentList: [] // 已完成课程没有待办作业
+  })),
+  ...courses.ongoing.map(c => ({
+    id: c.id,
+    code: c.code,
+    name: c.name,
+    semester: '本学期',
+    credit: 15,
+    mark: 0, // 进行中的课程还没有最终成绩
+    gradeBreakdown: [],
+    assignmentList: todoItems
+      .filter(t => t.course === c.name)
+      .map(t => ({
+        id: t.id,
+        name: t.title,
+        dueDate: t.dueDate,
+        submitted: t.isCompleted,
+        grade: t.isCompleted ? 85 : 0
+      }))
+  }))
+];
+
+// 生成课程表
+const mockSchedule = calendarEvents.slice(0, 10).map((e, index) => {
+  const colors = ['bg-indigo-500', 'bg-purple-500', 'bg-pink-500', 'bg-blue-500'];
+  const date = new Date(e.startTime);
+  return {
+    id: e.id,
+    dayOfWeek: date.toLocaleDateString('zh-CN', { weekday: 'short' }),
+    courseName: e.course,
+    time: `${date.toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})} - ${new Date(e.endTime).toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})}`,
+    location: e.location,
+    color: colors[index % colors.length]
+  };
+});
+
+// 使用统一的 calendarEvents
+const mockCalendarEvents = calendarEvents;
+
+// 使用统一的 emails
+const mockEmails = emails;
+
+// 使用统一的 emailDetails
+const mockEmailDetails = emailDetails;
     {
         id: 1,
         name: "数据科学与统计",
