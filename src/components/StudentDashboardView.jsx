@@ -62,7 +62,8 @@ import {
   activities, 
   emails, 
   emailDetails, 
-  healthData 
+  healthData,
+  allergies
 } from '../mockData';
 
 // --- Mock Data ---
@@ -769,6 +770,461 @@ const PrescriptionsModal = () => {
 };
 
 /**
+ * Allergies Modal - 过敏史管理
+ */
+const AllergiesModal = () => {
+    const [selectedAllergy, setSelectedAllergy] = useState(null);
+    const [showAddForm, setShowAddForm] = useState(false);
+
+    const getSeverityColor = (severity) => {
+        switch(severity) {
+            case '严重': return '#EF4444';
+            case '中度': return '#F59E0B';
+            case '轻度': return '#10B981';
+            default: return '#6B7280';
+        }
+    };
+
+    if (showAddForm) {
+        return <AddAllergyForm onClose={() => setShowAddForm(false)} />;
+    }
+
+    if (selectedAllergy) {
+        return <AllergyDetail allergy={selectedAllergy} onClose={() => setSelectedAllergy(null)} />;
+    }
+
+    return (
+        <div className="p-4 space-y-4 max-h-[80vh] overflow-y-auto">
+            <div className="flex justify-between items-center sticky top-0 bg-white dark:bg-gray-900 pb-3 z-10">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">过敏史管理</h2>
+                <button
+                    onClick={() => setShowAddForm(true)}
+                    className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                >
+                    <Plus className="w-5 h-5" />
+                </button>
+            </div>
+
+            {/* 警告提示 */}
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl flex items-start space-x-3">
+                <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                <div>
+                    <h3 className="font-semibold text-red-900 dark:text-red-100">重要提醒</h3>
+                    <p className="text-sm text-red-700 dark:text-red-300 mt-1">
+                        就医时请主动告知医生您的过敏史
+                    </p>
+                </div>
+            </div>
+
+            {/* 统计卡片 */}
+            <div className="grid grid-cols-3 gap-3">
+                <div className="p-3 bg-white dark:bg-gray-800 rounded-lg text-center">
+                    <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                        {allergies.filter(a => a.severity === '严重').length}
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">严重</div>
+                </div>
+                <div className="p-3 bg-white dark:bg-gray-800 rounded-lg text-center">
+                    <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                        {allergies.filter(a => a.severity === '中度').length}
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">中度</div>
+                </div>
+                <div className="p-3 bg-white dark:bg-gray-800 rounded-lg text-center">
+                    <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                        {allergies.filter(a => a.severity === '轻度').length}
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">轻度</div>
+                </div>
+            </div>
+
+            {/* 过敏史列表 */}
+            <div className="space-y-3">
+                {allergies.length === 0 ? (
+                    <div className="text-center py-12">
+                        <AlertTriangle className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
+                        <p className="text-gray-500 dark:text-gray-400">暂无过敏记录</p>
+                        <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">点击右上角 + 添加过敏史</p>
+                    </div>
+                ) : (
+                    allergies.map(allergy => (
+                        <button
+                            key={allergy.id}
+                            onClick={() => setSelectedAllergy(allergy)}
+                            className="w-full p-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm text-left border-l-4 hover:shadow-md transition-all"
+                            style={{ borderColor: allergy.severityColor }}
+                        >
+                            <div className="flex justify-between items-start mb-2">
+                                <div className="flex items-center space-x-2">
+                                    <AlertTriangle className="w-5 h-5" style={{ color: allergy.severityColor }} />
+                                    <h3 className="font-bold text-gray-900 dark:text-white">{allergy.allergen}</h3>
+                                </div>
+                                <span 
+                                    className="px-3 py-1 text-xs font-semibold text-white rounded-full"
+                                    style={{ backgroundColor: allergy.severityColor }}
+                                >
+                                    {allergy.severity}
+                                </span>
+                            </div>
+                            
+                            <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400 mb-2">
+                                <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded">
+                                    {allergy.allergyType}
+                                </span>
+                                <span>•</span>
+                                <span>发现于 {new Date(allergy.discoveredDate).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' })}</span>
+                            </div>
+
+                            {allergy.symptoms && allergy.symptoms.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-2">
+                                    {allergy.symptoms.slice(0, 3).map((symptom, index) => (
+                                        <span key={index} className="px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded">
+                                            {symptom}
+                                        </span>
+                                    ))}
+                                    {allergy.symptoms.length > 3 && (
+                                        <span className="px-2 py-0.5 text-xs text-gray-500 dark:text-gray-400">
+                                            +{allergy.symptoms.length - 3}
+                                        </span>
+                                    )}
+                                </div>
+                            )}
+                        </button>
+                    ))
+                )}
+            </div>
+        </div>
+    );
+};
+
+/**
+ * Allergy Detail - 过敏详情
+ */
+const AllergyDetail = ({ allergy, onClose }) => {
+    return (
+        <div className="p-4 space-y-4 max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between">
+                <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+                    <ChevronLeft className="w-5 h-5" />
+                </button>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">过敏详情</h2>
+                <div className="w-9"></div>
+            </div>
+
+            {/* 警告横幅 */}
+            <div 
+                className="p-4 rounded-xl flex items-center space-x-3"
+                style={{ backgroundColor: `${allergy.severityColor}15` }}
+            >
+                <AlertTriangle className="w-8 h-8 flex-shrink-0" style={{ color: allergy.severityColor }} />
+                <div>
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">{allergy.allergen}</h3>
+                    <div className="flex items-center space-x-2 mt-1">
+                        <span className="px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 rounded">
+                            {allergy.allergyType}
+                        </span>
+                        <span 
+                            className="px-3 py-1 text-xs font-semibold text-white rounded-full"
+                            style={{ backgroundColor: allergy.severityColor }}
+                        >
+                            {allergy.severity}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            {/* 症状 */}
+            {allergy.symptoms && allergy.symptoms.length > 0 && (
+                <div className="p-4 bg-white dark:bg-gray-800 rounded-xl">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-3">症状表现</h4>
+                    <div className="flex flex-wrap gap-2">
+                        {allergy.symptoms.map((symptom, index) => (
+                            <span key={index} className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg">
+                                {symptom}
+                            </span>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* 详细信息 */}
+            <div className="p-4 bg-white dark:bg-gray-800 rounded-xl space-y-3">
+                <h4 className="font-semibold text-gray-900 dark:text-white">详细信息</h4>
+                
+                <div className="flex items-center space-x-3 text-sm">
+                    <Calendar className="w-4 h-4 text-gray-400" />
+                    <span className="text-gray-600 dark:text-gray-400">发现日期</span>
+                    <span className="font-medium text-gray-900 dark:text-white ml-auto">
+                        {new Date(allergy.discoveredDate).toLocaleDateString('zh-CN', { 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                        })}
+                    </span>
+                </div>
+
+                {allergy.notes && (
+                    <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+                        <div className="flex items-start space-x-3">
+                            <FileText className="w-4 h-4 text-gray-400 mt-0.5" />
+                            <div>
+                                <span className="text-sm text-gray-600 dark:text-gray-400 block mb-1">备注</span>
+                                <p className="text-sm text-gray-900 dark:text-white">{allergy.notes}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* 安全提示 */}
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
+                <div className="flex items-center space-x-2 mb-2">
+                    <Info className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    <h4 className="font-semibold text-blue-900 dark:text-blue-100">安全提示</h4>
+                </div>
+                <ul className="space-y-1 text-sm text-blue-800 dark:text-blue-200">
+                    <li>• 就医时请主动告知医生此过敏史</li>
+                    <li>• 避免接触或使用此过敏原</li>
+                    <li>• 如出现严重过敏反应，请立即就医</li>
+                </ul>
+            </div>
+        </div>
+    );
+};
+
+/**
+ * Add Allergy Form - 添加过敏史表单
+ */
+const AddAllergyForm = ({ onClose }) => {
+    const [formData, setFormData] = useState({
+        allergen: '',
+        allergyType: '药物过敏',
+        severity: '轻度',
+        symptoms: [],
+        symptomInput: '',
+        discoveredDate: new Date().toISOString().split('T')[0],
+        notes: ''
+    });
+
+    const allergyTypes = ['药物过敏', '食物过敏', '环境过敏', '其他'];
+    const severityLevels = [
+        { value: '轻度', color: '#10B981' },
+        { value: '中度', color: '#F59E0B' },
+        { value: '严重', color: '#EF4444' }
+    ];
+    const commonSymptoms = ['皮疹', '瘙痒', '红肿', '呼吸困难', '恶心', '呕吐', '腹泻', '头晕', '心悸', '过敏性休克'];
+
+    const addSymptom = () => {
+        if (formData.symptomInput.trim() && !formData.symptoms.includes(formData.symptomInput.trim())) {
+            setFormData({
+                ...formData,
+                symptoms: [...formData.symptoms, formData.symptomInput.trim()],
+                symptomInput: ''
+            });
+        }
+    };
+
+    const removeSymptom = (symptom) => {
+        setFormData({
+            ...formData,
+            symptoms: formData.symptoms.filter(s => s !== symptom)
+        });
+    };
+
+    const toggleCommonSymptom = (symptom) => {
+        if (formData.symptoms.includes(symptom)) {
+            removeSymptom(symptom);
+        } else {
+            setFormData({ ...formData, symptoms: [...formData.symptoms, symptom] });
+        }
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        // 这里应该调用API保存数据
+        console.log('保存过敏史:', formData);
+        alert('过敏史已添加（演示模式）');
+        onClose();
+    };
+
+    return (
+        <div className="p-4 space-y-4 max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between sticky top-0 bg-white dark:bg-gray-900 pb-3 z-10">
+                <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+                    <X className="w-5 h-5" />
+                </button>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">添加过敏史</h2>
+                <div className="w-9"></div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+                {/* 过敏原信息 */}
+                <div className="p-4 bg-white dark:bg-gray-800 rounded-xl space-y-3">
+                    <h3 className="font-semibold text-gray-900 dark:text-white">过敏原信息</h3>
+                    
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            过敏原名称 *
+                        </label>
+                        <input
+                            type="text"
+                            required
+                            value={formData.allergen}
+                            onChange={(e) => setFormData({ ...formData, allergen: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                            placeholder="例如: 青霉素、花粉、海鲜等"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            过敏类型
+                        </label>
+                        <select
+                            value={formData.allergyType}
+                            onChange={(e) => setFormData({ ...formData, allergyType: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        >
+                            {allergyTypes.map(type => (
+                                <option key={type} value={type}>{type}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            严重程度
+                        </label>
+                        <div className="flex gap-2">
+                            {severityLevels.map(level => (
+                                <button
+                                    key={level.value}
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, severity: level.value })}
+                                    className={`flex-1 py-2 px-3 rounded-lg border-2 transition-all ${
+                                        formData.severity === level.value
+                                            ? 'border-current text-white'
+                                            : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
+                                    }`}
+                                    style={formData.severity === level.value ? { backgroundColor: level.color, borderColor: level.color } : {}}
+                                >
+                                    <div className="flex items-center justify-center space-x-1">
+                                        <div 
+                                            className="w-3 h-3 rounded-full" 
+                                            style={{ backgroundColor: level.color }}
+                                        ></div>
+                                        <span className="text-sm font-medium">{level.value}</span>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* 症状 */}
+                <div className="p-4 bg-white dark:bg-gray-800 rounded-xl space-y-3">
+                    <h3 className="font-semibold text-gray-900 dark:text-white">症状表现</h3>
+                    
+                    <div className="flex space-x-2">
+                        <input
+                            type="text"
+                            value={formData.symptomInput}
+                            onChange={(e) => setFormData({ ...formData, symptomInput: e.target.value })}
+                            onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSymptom())}
+                            className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                            placeholder="添加症状"
+                        />
+                        <button
+                            type="button"
+                            onClick={addSymptom}
+                            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                        >
+                            添加
+                        </button>
+                    </div>
+
+                    {formData.symptoms.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                            {formData.symptoms.map(symptom => (
+                                <span key={symptom} className="inline-flex items-center space-x-1 px-3 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-200 rounded-lg">
+                                    <span className="text-sm">{symptom}</span>
+                                    <button
+                                        type="button"
+                                        onClick={() => removeSymptom(symptom)}
+                                        className="hover:bg-indigo-200 dark:hover:bg-indigo-800 rounded-full p-0.5"
+                                    >
+                                        <X className="w-3 h-3" />
+                                    </button>
+                                </span>
+                            ))}
+                        </div>
+                    )}
+
+                    <div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">常见症状（点击快速添加）</p>
+                        <div className="flex flex-wrap gap-2">
+                            {commonSymptoms.map(symptom => (
+                                <button
+                                    key={symptom}
+                                    type="button"
+                                    onClick={() => toggleCommonSymptom(symptom)}
+                                    className={`px-3 py-1 text-sm rounded-lg transition-colors ${
+                                        formData.symptoms.includes(symptom)
+                                            ? 'bg-indigo-600 text-white'
+                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                    }`}
+                                >
+                                    {symptom}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* 其他信息 */}
+                <div className="p-4 bg-white dark:bg-gray-800 rounded-xl space-y-3">
+                    <h3 className="font-semibold text-gray-900 dark:text-white">其他信息</h3>
+                    
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            发现日期
+                        </label>
+                        <input
+                            type="date"
+                            value={formData.discoveredDate}
+                            onChange={(e) => setFormData({ ...formData, discoveredDate: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            备注
+                        </label>
+                        <textarea
+                            value={formData.notes}
+                            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                            rows={3}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
+                            placeholder="其他需要说明的信息..."
+                        />
+                    </div>
+                </div>
+
+                {/* 提交按钮 */}
+                <button
+                    type="submit"
+                    disabled={!formData.allergen}
+                    className="w-full py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                >
+                    保存过敏史
+                </button>
+            </form>
+        </div>
+    );
+};
+
+/**
  * Email Detail Modal (from StudentEmailView.swift)
  */
 const EmailDetailModal = ({ emailId }) => {
@@ -979,7 +1435,7 @@ const Dashboard = ({ t }) => {
                     subtitle={t ? 'Full schedule' : '完整日程'}
                     icon={CalendarIcon}
                     color="bg-gradient-to-br from-indigo-500 to-violet-600"
-                    onClick={() => console.log('Open calendar')}
+                    onClick={() => setSelectedTab('calendar')}
                 />
             </div>
             
@@ -1573,7 +2029,7 @@ const Health = () => {
                 <HealthRecordButton title="就诊历史" icon={ClipboardList} color="#6366F1" count={mockMedicalRecords.length} onClick={() => openModal('medicalRecords')} />
                 <HealthRecordButton title="处方记录" icon={Pill} color="#EF4444" count={mockPrescriptions.filter(p => p.status === 'active').length} onClick={() => openModal('prescriptions')} />
                 <HealthRecordButton title="预约面诊" icon={CalendarPlus} color="#10B981" count={0} onClick={() => openModal('appointmentBooking')} />
-                <HealthRecordButton title="过敏史" icon={AlertTriangle} color="#F59E0B" count={1} onClick={() => console.log('过敏史：花粉')} />
+                <HealthRecordButton title="过敏史" icon={AlertTriangle} color="#F59E0B" count={allergies.length} onClick={() => openModal('allergies')} />
             </div>
 
             <SegmentedControl tabs={tabs} selected={range} setSelected={setRange} />
@@ -2201,6 +2657,9 @@ function MainApp({ onLogout }) {
                 break;
             case 'healthSummary':
                 content = <Health t={t} />;
+                break;
+            case 'allergies':
+                content = <AllergiesModal />;
                 break;
             default:
                 content = <div className="p-4 text-gray-900 dark:text-white">未知弹窗</div>;

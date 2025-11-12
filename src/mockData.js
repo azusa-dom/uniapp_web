@@ -287,6 +287,40 @@ export const healthData = {
   ]
 };
 
+// --- 过敏史数据 ---
+export const allergies = [
+  {
+    id: 'AL01',
+    allergen: '青霉素',
+    allergyType: '药物过敏',
+    severity: '严重',
+    symptoms: ['皮疹', '瘙痒', '呼吸困难', '心悸'],
+    discoveredDate: '2020-03-15',
+    notes: '使用青霉素类抗生素后出现严重过敏反应，需要立即就医。请在就医时主动告知医生。',
+    severityColor: '#EF4444'
+  },
+  {
+    id: 'AL02',
+    allergen: '花粉',
+    allergyType: '环境过敏',
+    severity: '轻度',
+    symptoms: ['打喷嚏', '流鼻涕', '眼睛发痒'],
+    discoveredDate: '2018-04-20',
+    notes: '春季花粉过敏，症状较轻，可通过抗组胺药物缓解。',
+    severityColor: '#F59E0B'
+  },
+  {
+    id: 'AL03',
+    allergen: '海鲜',
+    allergyType: '食物过敏',
+    severity: '中度',
+    symptoms: ['皮疹', '红肿', '恶心', '腹泻'],
+    discoveredDate: '2019-07-10',
+    notes: '对虾、蟹等甲壳类海鲜过敏，进食后会出现消化道不适和皮肤反应。',
+    severityColor: '#F59E0B'
+  }
+];
+
 // --- AI 助手对话示例 ---
 export const aiConversations = [
     { 
