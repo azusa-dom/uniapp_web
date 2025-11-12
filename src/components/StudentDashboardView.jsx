@@ -2145,7 +2145,7 @@ const AIAssistant = () => {
         try {
             if (useRealAI) {
                 // 使用真实的 Google Gemini AI
-                const apiKey = import.meta.env.VITE_GOOGLE_AI_API_KEY || 'AIzaSyCGfAnODlgw4YsAP5_XhCUuZJ0OpMlam68';
+                const apiKey = import.meta.env.VITE_GOOGLE_AI_API_KEY || 'AIzaSyDgUvUSKMwc5t4apgrWK--00L0du7S10fU';
                 const genAI = new GoogleGenerativeAI(apiKey);
                 const model = genAI.getGenerativeModel({ model: "gemini-pro" });
                 
