@@ -2147,7 +2147,7 @@ const AIAssistant = () => {
                 // 使用真实的 Google Gemini AI
                 const apiKey = import.meta.env.VITE_GOOGLE_AI_API_KEY || 'AIzaSyDgUvUSKMwc5t4apgrWK--00L0du7S10fU';
                 const genAI = new GoogleGenerativeAI(apiKey);
-                const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+                const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
                 
                 // 构建上下文提示
                 const context = `你是一位专业的大学学业助手，帮助学生管理课程、作业和学习计划。
