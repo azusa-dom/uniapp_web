@@ -952,7 +952,7 @@ const Dashboard = ({ t }) => {
             </div>
 
             {/* Quick Access Cards */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-4">
                 <QuickAccessCard 
                     title={t ? t('email') : '邮件'}
                     subtitle={`${mockEmails.filter(e => !e.isRead).length} ${t ? 'unread' : '未读'}`}
@@ -971,14 +971,14 @@ const Dashboard = ({ t }) => {
                     title={t ? t('health') : '健康'}
                     subtitle={t ? 'View metrics' : '查看数据'}
                     icon={Heart}
-                    color="bg-gradient-to-br from-pink-500 to-pink-600"
+                    color="bg-gradient-to-br from-pink-500 to-rose-500"
                     onClick={() => openModal('healthSummary')}
                 />
                 <QuickAccessCard 
                     title={t ? t('calendar') : '日历'}
                     subtitle={t ? 'Full schedule' : '完整日程'}
                     icon={CalendarIcon}
-                    color="bg-gradient-to-br from-indigo-500 to-indigo-600"
+                    color="bg-gradient-to-br from-indigo-500 to-violet-600"
                     onClick={() => console.log('Open calendar')}
                 />
             </div>
@@ -1054,11 +1054,24 @@ const DeadlineCard = ({ todo, onClick }) => {
 const QuickAccessCard = ({ title, subtitle, icon: Icon, color, onClick }) => (
     <button 
         onClick={onClick}
-        className={`${color} p-6 rounded-2xl shadow-lg text-white flex flex-col items-start transition-transform hover:scale-105 active:scale-95`}
+        className="group relative p-5 bg-white dark:bg-gray-800 rounded-3xl shadow-md hover:shadow-xl border border-gray-100 dark:border-gray-700 flex flex-col items-start transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] overflow-hidden"
     >
-        <Icon className="w-8 h-8 mb-3 opacity-90" />
-        <h3 className="text-lg font-bold mb-1">{title}</h3>
-        <p className="text-sm opacity-90">{subtitle}</p>
+        {/* Background decoration */}
+        <div className={`absolute top-0 right-0 w-32 h-32 ${color} opacity-5 rounded-full blur-2xl group-hover:opacity-10 transition-opacity`}></div>
+        
+        {/* Icon with colored background */}
+        <div className={`${color} p-3 rounded-2xl mb-4 group-hover:scale-110 transition-transform`}>
+            <Icon className="w-6 h-6 text-white" />
+        </div>
+        
+        {/* Content */}
+        <div className="relative z-10">
+            <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1">{title}</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{subtitle}</p>
+        </div>
+        
+        {/* Hover indicator */}
+        <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-current to-transparent opacity-0 group-hover:opacity-20 transition-opacity" style={{ color: color.includes('blue') ? '#3B82F6' : color.includes('purple') ? '#A855F7' : color.includes('pink') ? '#EC4899' : '#6366F1' }}></div>
     </button>
 );
 
