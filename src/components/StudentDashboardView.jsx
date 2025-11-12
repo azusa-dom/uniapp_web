@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, createContext, useContext } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import ReactMarkdown from 'react-markdown';
+import { useTranslation } from '../i18n';
 import { 
   Home, 
   BookOpen, 
@@ -1940,8 +1941,7 @@ const EmailRow = ({ email, onClick }) => {
 };
 
 // --- Settings Page ---
-const SettingsPage = ({ onLogout }) => {
-    const [language, setLanguage] = useState('中文');
+const SettingsPage = ({ onLogout, language, setLanguage, t }) => {
     const [notifications, setNotifications] = useState(true);
     const [shareGrades, setShareGrades] = useState(true);
     const [shareCalendar, setShareCalendar] = useState(true);
@@ -1949,22 +1949,25 @@ const SettingsPage = ({ onLogout }) => {
     
     return (
         <div className="space-y-5">
-            <h1 className="text-2xl font-bold">设置</h1>
+            <h1 className="text-2xl font-bold">{t('settings')}</h1>
             
             {/* 语言设置 */}
             <div className="space-y-3">
-                <h2 className="text-lg font-semibold">语言设置</h2>
+                <h2 className="text-lg font-semibold">{t('student.language')}</h2>
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
-                    {['中文', 'English'].map((lang, index) => (
+                    {[
+                        { value: 'zh', label: '简体中文' },
+                        { value: 'en', label: 'English' }
+                    ].map((lang, index) => (
                         <button
-                            key={lang}
-                            onClick={() => setLanguage(lang)}
+                            key={lang.value}
+                            onClick={() => setLanguage(lang.value)}
                             className={`w-full flex items-center justify-between p-4 ${
                                 index > 0 ? 'border-t border-gray-100 dark:border-gray-700' : ''
                             }`}
                         >
-                            <span className="font-medium">{lang}</span>
-                            {language === lang && (
+                            <span className="font-medium">{lang.label}</span>
+                            {language === lang.value && (
                                 <Check className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                             )}
                         </button>
@@ -1974,14 +1977,14 @@ const SettingsPage = ({ onLogout }) => {
             
             {/* 数据共享 */}
             <div className="space-y-3">
-                <h2 className="text-lg font-semibold">数据共享</h2>
+                <h2 className="text-lg font-semibold">{t('student.privacy')}</h2>
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 space-y-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
                             <GraduationCap className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                             <div>
-                                <div className="font-medium">共享成绩</div>
-                                <div className="text-sm text-gray-500 dark:text-gray-400">与家长共享成绩信息</div>
+                                <div className="font-medium">{t('student.shareGrades')}</div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">{t('student.shareGradesDesc')}</div>
                             </div>
                         </div>
                         <button
@@ -2002,8 +2005,8 @@ const SettingsPage = ({ onLogout }) => {
                         <div className="flex items-center space-x-3">
                             <Calendar className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                             <div>
-                                <div className="font-medium">共享日程</div>
-                                <div className="text-sm text-gray-500 dark:text-gray-400">与家长共享日程安排</div>
+                                <div className="font-medium">{t('student.shareSchedule')}</div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">{t('student.shareScheduleDesc')}</div>
                             </div>
                         </div>
                         <button
@@ -2022,7 +2025,7 @@ const SettingsPage = ({ onLogout }) => {
             
             {/* 通知设置 */}
             <div className="space-y-3">
-                <h2 className="text-lg font-semibold">通知设置</h2>
+                <h2 className="text-lg font-semibold">{t('student.notifications')}</h2>
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
@@ -2049,7 +2052,7 @@ const SettingsPage = ({ onLogout }) => {
                 className="w-full flex items-center justify-center space-x-2 p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl font-semibold hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors border-2 border-red-200 dark:border-red-800"
             >
                 <User className="w-5 h-5" />
-                <span>退出登录</span>
+                <span>{t('student.logout')}</span>
             </button>
             
             {/* 退出确认弹窗 */}
@@ -2092,27 +2095,28 @@ export default function App({ onLogout }) {
 function MainApp({ onLogout }) {
     const [selectedTab, setSelectedTab] = useState("home");
     const { activeModal, closeModal } = useApp();
+    const { language, setLanguage, t } = useTranslation('zh', 'student');
 
     const renderPage = () => {
         switch (selectedTab) {
             case "home":
-                return <Dashboard />;
+                return <Dashboard t={t} />;
             case "academics":
-                return <Academics />;
+                return <Academics t={t} />;
             case "calendar":
-                return <CalendarPage />;
+                return <CalendarPage t={t} />;
             case "health":
-                return <Health />;
+                return <Health t={t} />;
             case "ai":
-                return <AIAssistant />;
+                return <AIAssistant t={t} />;
             case "activities":
-                return <ActivitiesPage />;
+                return <ActivitiesPage t={t} />;
             case "email":
-                return <Email />;
+                return <Email t={t} />;
             case "settings":
-                return <SettingsPage onLogout={onLogout} />;
+                return <SettingsPage onLogout={onLogout} language={language} setLanguage={setLanguage} t={t} />;
             default:
-                return <Dashboard />;
+                return <Dashboard t={t} />;
         }
     };
 
@@ -2160,6 +2164,7 @@ function MainApp({ onLogout }) {
             <BottomNav 
                 selectedTab={selectedTab} 
                 setSelectedTab={setSelectedTab}
+                t={t}
             />
         </div>
     );
@@ -2167,16 +2172,16 @@ function MainApp({ onLogout }) {
 
 // --- Bottom Navigation Component ---
 
-const BottomNav = ({ selectedTab, setSelectedTab }) => {
+const BottomNav = ({ selectedTab, setSelectedTab, t }) => {
     const navItems = [
-        { id: "home", label: "首页", icon: Home },
-        { id: "academics", label: "学业", icon: BookOpen },
-        { id: "calendar", label: "日历", icon: Calendar },
-        { id: "activities", label: "活动", icon: Sparkles },
-        { id: "health", label: "健康", icon: Heart },
-        { id: "ai", label: "AI", icon: BrainCircuit },
-        { id: "email", label: "邮件", icon: Mail },
-        { id: "settings", label: "设置", icon: Settings },
+        { id: "home", label: t('home'), icon: Home },
+        { id: "academics", label: t('academics'), icon: BookOpen },
+        { id: "calendar", label: t('calendar'), icon: Calendar },
+        { id: "activities", label: t('activities'), icon: Sparkles },
+        { id: "health", label: t('health'), icon: Heart },
+        { id: "ai", label: t('ai'), icon: BrainCircuit },
+        { id: "email", label: t('email'), icon: Mail },
+        { id: "settings", label: t('settings'), icon: Settings },
     ];
 
     return (

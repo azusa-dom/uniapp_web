@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { useTranslation } from '../i18n';
 import { 
     Home, 
     GraduationCap, 
@@ -2171,8 +2172,7 @@ const AiButton = ({ icon: Icon, text, activeText, isActive, onClick }) => (
 
 
 // --- 家长设置视图 ---
-const ParentSettingsView = ({ onLogout }) => {
-    const [language, setLanguage] = useState('中文');
+const ParentSettingsView = ({ onLogout, language, setLanguage, t }) => {
     const [emailNotifications, setEmailNotifications] = useState(true);
     const [importantAlerts, setImportantAlerts] = useState(true);
     const [dailySummaryTime, setDailySummaryTime] = useState('8:00 AM');
@@ -2181,22 +2181,25 @@ const ParentSettingsView = ({ onLogout }) => {
     return (
         <div className="p-4 space-y-5">
             {/* 标题 */}
-            <h1 className="text-2xl font-bold text-gray-900">设置</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{t('settings')}</h1>
             
             {/* 语言选择 */}
             <div className="space-y-3">
-                <h2 className="text-lg font-semibold text-gray-900">语言设置</h2>
+                <h2 className="text-lg font-semibold text-gray-900">{t('parent.languageSettings')}</h2>
                 <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-                    {['中文', 'English'].map((lang, index) => (
+                    {[
+                        { value: 'zh', label: '简体中文' },
+                        { value: 'en', label: 'English' }
+                    ].map((lang, index) => (
                         <button
-                            key={lang}
-                            onClick={() => setLanguage(lang)}
+                            key={lang.value}
+                            onClick={() => setLanguage(lang.value)}
                             className={`w-full flex items-center justify-between p-4 ${
                                 index > 0 ? 'border-t border-gray-100' : ''
                             }`}
                         >
-                            <span className="font-medium text-gray-900">{lang}</span>
-                            {language === lang && (
+                            <span className="font-medium text-gray-900">{lang.label}</span>
+                            {language === lang.value && (
                                 <Check className="w-5 h-5 text-violet-600" />
                             )}
                         </button>
@@ -2206,16 +2209,16 @@ const ParentSettingsView = ({ onLogout }) => {
             
             {/* 数据共享状态 */}
             <div className="space-y-3">
-                <h2 className="text-lg font-semibold text-gray-900">数据共享状态</h2>
+                <h2 className="text-lg font-semibold text-gray-900">{t('parent.dataPrivacy')}</h2>
                 <div className="bg-white rounded-xl shadow-sm p-4 space-y-4">
                     <div className="flex justify-between items-center">
-                        <span className="font-medium text-gray-700">成绩共享</span>
-                        <span className="text-green-600 font-semibold">开启</span>
+                        <span className="font-medium text-gray-700">{t('student.shareGrades')}</span>
+                        <span className="text-green-600 font-semibold">{t('parent.completed')}</span>
                     </div>
                     <div className="h-px bg-gray-100"></div>
                     <div className="flex justify-between items-center">
-                        <span className="font-medium text-gray-700">日程共享</span>
-                        <span className="text-green-600 font-semibold">开启</span>
+                        <span className="font-medium text-gray-700">{t('student.shareSchedule')}</span>
+                        <span className="text-green-600 font-semibold">{t('parent.completed')}</span>
                     </div>
                     <div className="text-xs text-gray-500 text-center mt-2 pt-2 border-t border-gray-100">
                         数据共享由学生端控制
@@ -2225,14 +2228,14 @@ const ParentSettingsView = ({ onLogout }) => {
             
             {/* 通知设置 */}
             <div className="space-y-3">
-                <h2 className="text-lg font-semibold text-gray-900">通知设置</h2>
+                <h2 className="text-lg font-semibold text-gray-900">{t('parent.preferences')}</h2>
                 <div className="bg-white rounded-xl shadow-sm overflow-hidden">
                     <div className="flex items-center justify-between p-4">
                         <div className="flex items-center space-x-3">
                             <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
                                 <Bell className="w-5 h-5 text-indigo-600" />
                             </div>
-                            <span className="font-medium text-gray-900">邮件通知</span>
+                            <span className="font-medium text-gray-900">{t('parent.emailNotifications')}</span>
                         </div>
                         <button
                             onClick={() => setEmailNotifications(!emailNotifications)}
@@ -2253,7 +2256,7 @@ const ParentSettingsView = ({ onLogout }) => {
                             <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
                                 <AlertCircle className="w-5 h-5 text-amber-600" />
                             </div>
-                            <span className="font-medium text-gray-900">重要提醒</span>
+                            <span className="font-medium text-gray-900">{t('parent.pushNotifications')}</span>
                         </div>
                         <button
                             onClick={() => setImportantAlerts(!importantAlerts)}
@@ -2287,7 +2290,7 @@ const ParentSettingsView = ({ onLogout }) => {
                 className="w-full flex items-center justify-center space-x-2 p-4 bg-red-50 text-red-600 rounded-xl font-semibold hover:bg-red-100 transition-colors border-2 border-red-200"
             >
                 <Lock className="w-5 h-5" />
-                <span>退出登录</span>
+                <span>{t('student.logout')}</span>
             </button>
             
             {/* 退出确认弹窗 */}
@@ -2322,25 +2325,26 @@ const ParentSettingsView = ({ onLogout }) => {
 const App = ({ onLogout }) => {
     const [activeTab, setActiveTab] = useState('home');
     const [modal, setModal] = useState(null); // e.g., { type: 'settings', data: null }
+    const { language, setLanguage, t } = useTranslation('zh', 'parent');
 
     const renderView = () => {
         switch (activeTab) {
             case 'home':
-                return <ParentDashboardView setModal={setModal} setActiveTab={setActiveTab} />;
+                return <ParentDashboardView setModal={setModal} setActiveTab={setActiveTab} t={t} />;
             case 'academics':
-                return <ParentAcademicDetailView />;
+                return <ParentAcademicDetailView t={t} />;
             case 'calendar':
-                return <ParentCalendarView setModal={setModal} />;
+                return <ParentCalendarView setModal={setModal} t={t} />;
             case 'health':
-                return <ParentHealthView setModal={setModal} />;
+                return <ParentHealthView setModal={setModal} t={t} />;
             case 'ai':
-                return <ParentAIAssistantView />;
+                return <ParentAIAssistantView t={t} />;
             case 'mail':
-                return <ParentEmailView setModal={setModal} />;
+                return <ParentEmailView setModal={setModal} t={t} />;
             case 'settings':
-                return <ParentSettingsView onLogout={onLogout} />;
+                return <ParentSettingsView onLogout={onLogout} language={language} setLanguage={setLanguage} t={t} />;
             default:
-                return <ParentDashboardView setModal={setModal} setActiveTab={setActiveTab} />;
+                return <ParentDashboardView setModal={setModal} setActiveTab={setActiveTab} t={t} />;
         }
     };
     
@@ -2377,43 +2381,43 @@ const App = ({ onLogout }) => {
                 <nav className="flex justify-around max-w-md mx-auto px-2 py-1.5">
                     <TabBarButton
                         icon={Home}
-                        label="首页"
+                        label={t('home')}
                         isActive={activeTab === 'home'}
                         onClick={() => setActiveTab('home')}
                     />
                     <TabBarButton
                         icon={GraduationCap}
-                        label="学业"
+                        label={t('academics')}
                         isActive={activeTab === 'academics'}
                         onClick={() => setActiveTab('academics')}
                     />
                     <TabBarButton
                         icon={Calendar}
-                        label="日历"
+                        label={t('calendar')}
                         isActive={activeTab === 'calendar'}
                         onClick={() => setActiveTab('calendar')}
                     />
                     <TabBarButton
                         icon={Heart}
-                        label="健康"
+                        label={t('health')}
                         isActive={activeTab === 'health'}
                         onClick={() => setActiveTab('health')}
                     />
                     <TabBarButton
                         icon={Sparkles}
-                        label="AI"
+                        label={t('ai')}
                         isActive={activeTab === 'ai'}
                         onClick={() => setActiveTab('ai')}
                     />
                     <TabBarButton
                         icon={Mail}
-                        label="邮件"
+                        label={t('email')}
                         isActive={activeTab === 'mail'}
                         onClick={() => setActiveTab('mail')}
                     />
                     <TabBarButton
                         icon={Settings}
-                        label="设置"
+                        label={t('settings')}
                         isActive={activeTab === 'settings'}
                         onClick={() => setActiveTab('settings')}
                     />
