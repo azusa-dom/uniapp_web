@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, createContext, useContext } from 'react';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import ReactMarkdown from 'react-markdown';
 import { useTranslation } from '../i18n';
 import { 
@@ -2652,31 +2651,18 @@ const AIAssistant = () => {
         setApiKeyError(false);
 
         try {
-            // 使用真实的 Google Gemini AI
-            const apiKey = import.meta.env.VITE_GOOGLE_AI_API_KEY;
+            // 使用 Deepseek AI
+            const apiKey = import.meta.env.VITE_DEEPSEEK_API_KEY;
             
-            console.log('🔑 API Key 状态:', {
+            console.log('🔑 Deepseek API Key 状态:', {
                 exists: !!apiKey,
                 length: apiKey?.length || 0,
-                firstChars: apiKey?.substring(0, 10) || 'undefined',
-                allEnvVars: Object.keys(import.meta.env)
+                firstChars: apiKey?.substring(0, 10) || 'undefined'
             });
             
             if (!apiKey || apiKey.startsWith('your_')) {
-                throw new Error('Google AI API Key 未配置。请在 .env 文件中设置 VITE_GOOGLE_AI_API_KEY');
+                throw new Error('Deepseek API Key 未配置。请在 .env 文件中设置 VITE_DEEPSEEK_API_KEY');
             }
-            
-            const genAI = new GoogleGenerativeAI(apiKey);
-            const model = genAI.getGenerativeModel({ 
-                model: "gemini-1.5-flash",
-                // 添加请求配置避免 CORS 问题
-                generationConfig: {
-                    temperature: 0.7,
-                    topK: 40,
-                    topP: 0.95,
-                    maxOutputTokens: 1024,
-                }
-            });
             
             // 构建上下文提示
             const context = `你是一位专业的大学学业助手，帮助学生管理课程、作业和学习计划。
@@ -2689,9 +2675,33 @@ const AIAssistant = () => {
 
 学生的问题：${prompt}`;
 
-            const result = await model.generateContent(context);
-            const response = await result.response;
-            const aiText = response.text();
+            // 调用 Deepseek API (OpenAI 兼容接口)
+            const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: 'deepseek-chat',
+                    messages: [
+                        {
+                            role: 'user',
+                            content: context
+                        }
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 1024
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error?.message || `API 请求失败: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const aiText = data.choices[0]?.message?.content || '抱歉，我没有收到有效的回复。';
             
             const aiMessage = { id: Date.now() + 1, text: aiText, isUser: false };
             setMessages(prev => [...prev, aiMessage]);
@@ -2700,13 +2710,7 @@ const AIAssistant = () => {
             setApiKeyError(true);
             
             let errorText = `❌ API 调用失败：${error.message}\n\n`;
-            
-            // 检查是否是 referrer 限制错误
-            if (error.message.includes('API_KEY_HTTP_REFERRER_BLOCKED') || error.message.includes('403')) {
-                errorText += `**原因：** API Key 被 HTTP Referrer 限制阻止\n\n**解决方案：**\n1. 访问 [Google AI Studio API Keys](https://aistudio.google.com/app/apikey)\n2. 找到你的 API Key，点击编辑\n3. 在 "Application restrictions" 中：\n   - 选择 "HTTP referrers (websites)"\n   - 添加你的网站域名：\`https://shiny-space-train-7vvrjwjvwvxpcx4jv-5173.app.github.dev/*\`\n   - 或者暂时选择 "None" 来移除限制（仅供测试）\n4. 保存后等待几分钟生效\n\n**临时方案：** 创建一个新的 API Key 并选择 "None" 作为限制类型`;
-            } else {
-                errorText += `**解决方案：**\n1. 确保你有有效的 Google AI API Key\n2. 在项目根目录的 \`.env\` 文件中设置：\n   \`VITE_GOOGLE_AI_API_KEY=your_actual_api_key\`\n3. 重新启动开发服务器（npm run dev）\n\n如需获取 API Key，请访问 [Google AI Studio](https://aistudio.google.com/app/apikey)`;
-            }
+            errorText += `**解决方案：**\n1. 确保你有有效的 Deepseek API Key\n2. 在项目根目录的 \`.env\` 文件中设置：\n   \`VITE_DEEPSEEK_API_KEY=your_actual_api_key\`\n3. 重新启动开发服务器（npm run dev）\n\n如需获取 API Key，请访问 [Deepseek Platform](https://platform.deepseek.com/)`;
             
             const errorMessage = {
                 id: Date.now() + 1,
