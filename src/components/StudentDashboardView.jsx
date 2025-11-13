@@ -3,6 +3,13 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import ReactMarkdown from 'react-markdown';
 import { useTranslation } from '../i18n';
 import { 
+  getTranslatedCourse, 
+  getTranslatedActivity, 
+  getTranslatedTodo, 
+  getTranslatedEmail,
+  getComponentName 
+} from '../translations/translationUtils';
+import { 
   Home, 
   BookOpen, 
   Calendar, 
@@ -1587,11 +1594,12 @@ const EmptyStateCard = ({ icon: Icon, message }) => (
 /**
  * Page: Academics (from StudentAcademicsView.swift)
  */
-const Academics = () => {
+const Academics = ({ t }) => {
     const { openModal } = useApp();
+    const { language } = useTranslation();
     const [selectedTab, setSelectedTab] = useState("modules");
     const tabs = [
-        { id: "modules", label: "课程" },
+        { id: "modules", label: t('student.courses') },
         { id: "schedule", label: "课程表" }
     ];
     
@@ -1600,7 +1608,7 @@ const Academics = () => {
 
     return (
         <div className="space-y-5">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">学业</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('student.academics')}</h1>
             <SegmentedControl tabs={tabs} selected={selectedTab} setSelected={setSelectedTab} />
 
             {selectedTab === "modules" && (
@@ -1615,17 +1623,17 @@ const Academics = () => {
                         </div>
                         <div className="flex-1">
                             <span className="py-1 px-3 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 text-xs font-medium rounded-full">
-                                一等学位
+                                {language === 'en' ? 'First Class Honours' : '一等学位'}
                             </span>
-                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mt-2">总平均分</h2>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">优秀 - 一等学位水平!</p>
+                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mt-2">{language === 'en' ? 'Overall Average' : '总平均分'}</h2>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{language === 'en' ? 'Excellent - First Class Level!' : '优秀 - 一等学位水平!'}</p>
                         </div>
                     </div>
                     
                     {/* Modules List */}
                     <div className="space-y-3">
                         {mockModules.map(module => (
-                            <ModuleCard key={module.id} module={module} onClick={() => openModal('moduleDetail', module.id)} />
+                            <ModuleCard key={module.id} module={module} onClick={() => openModal('moduleDetail', module.id)} language={language} />
                         ))}
                     </div>
                 </div>
@@ -1633,7 +1641,7 @@ const Academics = () => {
 
             {selectedTab === "schedule" && (
                 <div className="space-y-3">
-                    {mockSchedule.map(item => <ScheduleCard key={item.id} item={item} />)}
+                    {mockSchedule.map(item => <ScheduleCard key={item.id} item={item} language={language} />)}
                 </div>
             )}
         </div>
@@ -1641,7 +1649,8 @@ const Academics = () => {
 };
 
 // Academics Sub-components
-const ModuleCard = ({ module, onClick }) => {
+const ModuleCard = ({ module, onClick, language }) => {
+    const translatedModule = getTranslatedCourse(module, language);
     const markColor = (mark) => {
         if (mark >= 80) return "text-green-600 dark:text-green-400";
         if (mark >= 70) return "text-purple-600 dark:text-purple-400";
@@ -1653,14 +1662,14 @@ const ModuleCard = ({ module, onClick }) => {
         <button onClick={onClick} className="w-full p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-sm text-left">
             <div className="flex justify-between items-start">
                 <div className="flex-1 mr-4">
-                    <h3 className="font-semibold text-gray-900 dark:text-white">{module.name}</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{module.code}</p>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{translatedModule.name}</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{translatedModule.code}</p>
                 </div>
                 <div className="flex flex-col items-end">
                     {module.mark > 0 ? (
                         <span className={`text-2xl font-bold ${markColor(module.mark)}`}>{module.mark}</span>
                     ) : (
-                        <span className="text-sm font-medium text-yellow-600 dark:text-yellow-400">进行中</span>
+                        <span className="text-sm font-medium text-yellow-600 dark:text-yellow-400">{language === 'en' ? 'In Progress' : '进行中'}</span>
                     )}
                 </div>
             </div>
@@ -1676,7 +1685,7 @@ const ModuleCard = ({ module, onClick }) => {
     );
 };
 
-const ScheduleCard = ({ item }) => (
+const ScheduleCard = ({ item, language }) => (
     <div className="p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-sm flex space-x-4">
         <div className={`w-14 h-14 ${item.color} rounded-lg flex flex-col items-center justify-center flex-shrink-0`}>
             <span className="text-sm font-bold text-white">{item.dayOfWeek}</span>
