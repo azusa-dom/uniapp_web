@@ -7,7 +7,8 @@ import {
   getTranslatedActivity, 
   getTranslatedTodo, 
   getTranslatedEmail,
-  getComponentName 
+  getComponentName,
+  getCourseNameByCode
 } from '../translations/translationUtils';
 import { 
   Home, 
@@ -128,6 +129,7 @@ const mockSchedule = calendarEvents.slice(0, 10).map((e, index) => {
   const date = new Date(e.startTime);
   return {
     id: e.id,
+    courseId: e.courseCode, // 用 courseCode 来查找翻译
     dayOfWeek: date.toLocaleDateString('zh-CN', { weekday: 'short' }),
     courseName: e.course,
     time: `${date.toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})} - ${new Date(e.endTime).toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})}`,
@@ -1702,7 +1704,7 @@ const ScheduleCard = ({ item, language }) => (
             <span className="text-sm font-bold text-white">{item.dayOfWeek}</span>
         </div>
         <div className="flex-1 overflow-hidden">
-            <h3 className="font-semibold text-gray-900 dark:text-white truncate">{item.courseName}</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-white truncate">{getCourseNameByCode(item.courseId, language)}</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400">{item.time}</p>
             <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{item.location}</p>
         </div>

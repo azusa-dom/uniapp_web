@@ -1,5 +1,16 @@
 import { courseTranslations, activitiesTranslations, todoTranslations, emailTranslations, uiTranslations } from './courseTranslations';
 
+// 通过 courseCode 查找课程名称
+export const getCourseNameByCode = (courseCode, language = 'zh') => {
+  // 遍历所有课程 ID，找到对应的 code
+  for (const courseId in courseTranslations[language]) {
+    if (courseTranslations[language][courseId].code === courseCode) {
+      return courseTranslations[language][courseId].name || courseCode;
+    }
+  }
+  return courseCode;
+};
+
 // 获取UI文本翻译
 export const getUIText = (key, language = 'zh') => {
   return uiTranslations[language]?.[key] || key;
