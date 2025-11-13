@@ -58,7 +58,11 @@ import {
   Star,
   GraduationCap,
   Eye,
-  Book
+  Book,
+  PhoneCall,
+  Brain,
+  Stethoscope,
+  ClipboardList as MedicalClipboard
 } from 'lucide-react';
 
 // 从统一数据源导入
@@ -2068,101 +2072,133 @@ const ModernEventCard = ({ event }) => (
 /**
  * Health (from StudentHealthView.swift) - 简化版：只展示几个核心健康功能
  */
+// --- Health (学生端健康页面) ---
+
 const Health = ({ t }) => {
-  const { openModal } = useApp();
-  const { language } = useTranslation();
-  const isEn = language === 'en';
+    const { openModal } = useApp();
+    const { language } = useTranslation();
+    const isEn = language === "en";
 
-  const title = isEn ? 'Health Center' : '健康中心';
-  const subtitle = isEn
-    ? 'Key health services at a glance.'
-    : '常用健康服务一目了然。';
+    return (
+        <div className="space-y-6">
+            {/* 标题 */}
+            <div className="space-y-1">
+                <p className="text-xs uppercase tracking-widest text-indigo-500 font-semibold">
+                    {isEn ? "Health" : "健康"}
+                </p>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                    {isEn ? "Campus Health Services" : "校园健康服务"}
+                </h1>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {isEn
+                        ? "One-tap consult, on-campus appointments, and your health reports in one place."
+                        : "一键问诊、预约面诊和个人健康报告，都在这里统一管理。"}
+                </p>
+            </div>
 
-  const quickConsultTitle = isEn ? 'One-click consult' : '一键问诊';
-  const quickConsultDesc = isEn
-    ? 'Students can contact our medical team anytime for remote consultation.'
-    : '学生可以随时联系我们进行远程医疗咨询。';
-
-  // 预约面诊的几个大项
-  const appointmentOptions = [
-    {
-      id: 'psych',
-      icon: BrainCircuit, // 已在文件顶部引入
-      title: isEn ? 'Psychological assessment' : '心理评估',
-      desc: isEn
-        ? 'Support for stress, mood and study-related pressure.'
-        : '针对压力、情绪和学习负担的心理评估与支持。',
-    },
-    {
-      id: 'allergy',
-      icon: AlertTriangle,
-      title: isEn ? 'Allergy testing' : '过敏检测',
-      desc: isEn
-        ? 'Screening for common food and environmental allergies.'
-        : '常见食物与环境过敏原筛查。',
-    },
-    {
-      id: 'checkup',
-      icon: HeartPulse,
-      title: isEn ? 'Physical check-up' : '身体检查',
-      desc: isEn
-        ? 'Basic physical exam and health status review.'
-        : '基础体检与整体健康状况评估。',
-    },
-    {
-      id: 'general',
-      icon: ClipboardList,
-      title: isEn ? 'Comprehensive consult' : '综合问诊',
-      desc: isEn
-        ? 'General medical consultation for complex or unclear symptoms.'
-        : '针对复杂或不明确症状的综合问诊服务。',
-    },
-  ];
-
-  return (
-    <div className="space-y-5">
-      {/* 标题区域 */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          {title}
-        </h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          {subtitle}
-        </p>
-      </div>
-
-      {/* 一键问诊 */}
-      <QuickActionCard
-        icon={MessageCircle}
-        title={quickConsultTitle}
-        description={quickConsultDesc}
-        buttonText={isEn ? 'Start consult' : '开始问诊'}
-        // 这里的 modal key 你可以在全局 modal 里自己实现，
-        // 暂时写成 oneClickConsult，不会影响其他界面
-        onClick={() => openModal && openModal('oneClickConsult')}
-      />
-
-      {/* 预约面诊几大类 */}
-      <div className="space-y-3">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-          {isEn ? 'Book an appointment' : '预约面诊'}
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {appointmentOptions.map((opt) => (
-            <AppointmentOptionCard
-              key={opt.id}
-              icon={opt.icon}
-              title={opt.title}
-              description={opt.desc}
-              // 这里统一走 appointmentBooking 这个 modal，
-              // 你后面如果想区分，可以在 onClick 里加参数或换成不同 key
-              onClick={() => openModal && openModal('appointmentBooking')}
+            {/* 一键问诊 */}
+            <QuickActionCard
+                icon={PhoneCall}
+                title={isEn ? "One-tap consult" : "一键问诊"}
+                description={
+                    isEn
+                        ? "Students can contact our remote medical team at any time. After submitting symptoms, a doctor will reply within 15 minutes via text / phone / video."
+                        : "学生可以随时发起远程医疗咨询。提交症状后，医生团队会在 15 分钟内通过文字 / 电话 / 视频进行回复。"
+                }
+                buttonText={isEn ? "Contact remote doctor" : "联系远程医生"}
+                onClick={() => openModal("appointmentBooking")}
             />
-          ))}
+
+            {/* 预约面诊：四个大项 */}
+            <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        {isEn ? "Book on-site visit" : "预约面诊"}
+                    </h2>
+                    <button
+                        type="button"
+                        className="text-xs font-medium text-indigo-600 hover:text-indigo-500"
+                        onClick={() => openModal("appointmentBooking")}
+                    >
+                        {isEn ? "Book now" : "立即预约"}
+                    </button>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {isEn
+                        ? "Select from major services below. You'll be matched with the right doctor team."
+                        : "按需选择以下大项服务，我们会为你匹配合适的校医院 / 专家团队。"}
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <AppointmentOptionCard
+                        icon={Brain}
+                        title={isEn ? "Psychological assessment" : "心理评估"}
+                        description={
+                            isEn
+                                ? "Emotional support, stress management and basic mental health screening."
+                                : "情绪支持、压力管理与基础心理健康评估。"
+                        }
+                        onClick={() => openModal("appointmentBooking")}
+                    />
+                    <AppointmentOptionCard
+                        icon={Sparkles}
+                        title={isEn ? "Allergy testing" : "过敏检测"}
+                        description={
+                            isEn
+                                ? "Food / respiratory allergy screening with doctor explanation."
+                                : "呼吸道 / 食物过敏筛查，并提供医学解释。"
+                        }
+                        onClick={() => openModal("allergies")}
+                    />
+                    <AppointmentOptionCard
+                        icon={Stethoscope}
+                        title={isEn ? "Physical check-up" : "身体检查"}
+                        description={
+                            isEn
+                                ? "Basic physical exam and sports-safety check for students."
+                                : "基础体检 + 运动安全评估，适合长期伏案或运动量大的学生。"
+                        }
+                        onClick={() => openModal("appointmentBooking")}
+                    />
+                    <AppointmentOptionCard
+                        icon={MedicalClipboard}
+                        title={isEn ? "General consultation" : "综合问诊"}
+                        description={
+                            isEn
+                                ? "Multi-disciplinary consultation for complex or long-term conditions."
+                                : "多学科联合评估，适合症状复杂或长期反复的情况。"
+                        }
+                        onClick={() => openModal("appointmentBooking")}
+                    />
+                </div>
+            </div>
+
+            {/* 我的报告 */}
+            <div className="space-y-3">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {isEn ? "My reports" : "我的报告"}
+                </h2>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {isEn
+                        ? "View your visit history and prescriptions. Future lab / imaging reports can also be linked here."
+                        : "查看就诊记录和处方记录，之后也可以接入体检报告、影像报告等。"}
+                </p>
+
+                <div className="grid grid-cols-2 gap-3">
+                    <ReportCard
+                        title={isEn ? "Visit history" : "就诊历史"}
+                        count={mockHealthData.medicalRecords.length}
+                        onClick={() => openModal("medicalRecords")}
+                    />
+                    <ReportCard
+                        title={isEn ? "Prescriptions" : "处方记录"}
+                        count={mockHealthData.prescriptions.length}
+                        onClick={() => openModal("prescriptions")}
+                    />
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 /**
@@ -2215,6 +2251,29 @@ const AppointmentOptionCard = ({ icon: Icon, title, description, onClick }) => (
       </div>
     </div>
   </button>
+);
+
+const ReportCard = ({ title, count, onClick }) => (
+    <button
+        type="button"
+        onClick={onClick}
+        className="w-full text-left p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:border-indigo-400 hover:shadow-md transition"
+    >
+        <div className="flex items-center justify-between">
+            <div>
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                    {title}
+                </h3>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    {`记录数：${count}`}
+                </p>
+            </div>
+            <div className="flex items-center gap-1 text-xs font-medium text-indigo-600">
+                <span>查看详情</span>
+                <ChevronRight className="w-4 h-4" />
+            </div>
+        </div>
+    </button>
 );
 
 
@@ -2794,6 +2853,8 @@ function MainApp({ onLogout }) {
                 return <Academics t={t} />;
             case "calendar":
                 return <CalendarPage t={t} />;
+            case "health":
+                return <Health t={t} />;          // ✅ 新增健康主页面
             case "ai":
                 return <AIAssistant t={t} />;
             case "settings":
@@ -2847,48 +2908,53 @@ function MainApp({ onLogout }) {
 
     return (
         <div className="h-screen w-full flex flex-col font-sans bg-gradient-to-br from-gray-50 to-indigo-50 dark:from-gray-900 dark:to-indigo-900/50 text-gray-900 dark:text-white">
-            {/* Main Content Area */}
-            <main className={`flex-1 overflow-y-auto pb-20 ${selectedTab === 'ai' ? 'p-0' : 'p-4'}`}>
-                {renderPage()}
-            </main>
-
-            {/* Modal Renderer */}
-            {activeModal && renderModal()}
-
-            {/* Bottom Navigation */}
-            <BottomNav 
-                selectedTab={selectedTab} 
+            {/* 顶部导航 */}
+            <TopNav
+                selectedTab={selectedTab}
                 setSelectedTab={setSelectedTab}
                 t={t}
             />
+
+            {/* 主内容区域 */}
+            <main
+                className={`flex-1 overflow-y-auto ${selectedTab === "ai" ? "p-0" : "p-4"}`}
+            >
+                {renderPage()}
+            </main>
+
+            {/* 弹窗渲染 */}
+            {activeModal && renderModal()}
         </div>
     );
 }
 
-// --- Bottom Navigation Component ---
+// --- Top Navigation Component (顶部导航) ---
 
-const BottomNav = ({ selectedTab, setSelectedTab, t }) => {
+const TopNav = ({ selectedTab, setSelectedTab, t }) => {
     const navItems = [
-        { id: "home", label: t('home'), icon: Home },
-        { id: "academics", label: t('academics'), icon: BookOpen },
-        { id: "calendar", label: t('calendar'), icon: Calendar },
-        { id: "ai", label: t('ai'), icon: BrainCircuit },
-        { id: "settings", label: t('settings'), icon: Settings },
+        { id: "home", label: t("home"), icon: Home },
+        { id: "academics", label: t("academics"), icon: BookOpen },
+        { id: "calendar", label: t("calendar"), icon: Calendar },
+        { id: "health", label: t("health") || "健康", icon: HeartPulse },
+        { id: "ai", label: t("ai"), icon: BrainCircuit },
+        { id: "settings", label: t("settings"), icon: Settings },
     ];
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-t border-gray-200 dark:border-gray-700 shadow-t-lg">
-            <div className="max-w-4xl mx-auto flex justify-around items-center px-2 py-3">
-                {navItems.map(item => (
+        <nav className="w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+            <div className="max-w-4xl mx-auto flex overflow-x-auto px-3 py-2 gap-2">
+                {navItems.map((item) => (
                     <button
                         key={item.id}
                         onClick={() => setSelectedTab(item.id)}
-                        className={`flex flex-col items-center justify-center w-14 transition-all
-                            ${selectedTab === item.id ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400 hover:text-indigo-500'}
-                        `}
+                        className={`flex items-center px-3 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                            selectedTab === item.id
+                                ? "bg-indigo-600 text-white shadow-sm"
+                                : "bg-transparent text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                        }`}
                     >
-                        <item.icon className="w-6 h-6" />
-                        <span className="text-xs font-medium mt-1">{item.label}</span>
+                        <item.icon className="w-4 h-4 mr-1.5" />
+                        <span>{item.label}</span>
                     </button>
                 ))}
             </div>
