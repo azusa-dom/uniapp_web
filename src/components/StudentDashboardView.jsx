@@ -2655,6 +2655,13 @@ const AIAssistant = () => {
             // 使用真实的 Google Gemini AI
             const apiKey = import.meta.env.VITE_GOOGLE_AI_API_KEY;
             
+            console.log('🔑 API Key 状态:', {
+                exists: !!apiKey,
+                length: apiKey?.length || 0,
+                firstChars: apiKey?.substring(0, 10) || 'undefined',
+                allEnvVars: Object.keys(import.meta.env)
+            });
+            
             if (!apiKey || apiKey.startsWith('your_')) {
                 throw new Error('Google AI API Key 未配置。请在 .env 文件中设置 VITE_GOOGLE_AI_API_KEY');
             }

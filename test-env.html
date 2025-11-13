@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>环境变量测试</title>
+</head>
+<body>
+    <h1>环境变量测试</h1>
+    <div id="output"></div>
+    
+    <script type="module">
+        const apiKey = import.meta.env.VITE_GOOGLE_AI_API_KEY;
+        const output = document.getElementById('output');
+        
+        output.innerHTML = `
+            <h2>测试结果：</h2>
+            <p><strong>API Key 是否存在:</strong> ${apiKey ? '✅ 是' : '❌ 否'}</p>
+            <p><strong>API Key 长度:</strong> ${apiKey?.length || 0}</p>
+            <p><strong>API Key 前10个字符:</strong> ${apiKey?.substring(0, 10) || 'undefined'}</p>
+            <p><strong>所有环境变量:</strong></p>
+            <pre>${JSON.stringify(import.meta.env, null, 2)}</pre>
+        `;
+        
+        console.log('🔍 环境变量测试:', {
+            apiKey,
+            allEnv: import.meta.env
+        });
+    </script>
+</body>
+</html>
