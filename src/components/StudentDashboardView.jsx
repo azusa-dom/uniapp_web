@@ -289,6 +289,104 @@ const AppProvider = ({ children }) => {
 
 const useApp = () => useContext(AppContext);
 
+// --- Schedule Context (Dynamic Course Management) ---
+const ScheduleContext = createContext();
+
+const generateRepeatSchedules = (schedule, repeatRule, repeatUntil) => {
+    const schedules = [schedule];
+    
+    if (repeatRule === 'none' || !repeatUntil) {
+        return schedules;
+    }
+    
+    const startDate = new Date(schedule.startTime);
+    const endDate = new Date(schedule.endTime);
+    const duration = endDate - startDate;
+    let currentDate = new Date(startDate);
+    
+    while (currentDate < new Date(repeatUntil)) {
+        let nextDate;
+        
+        switch (repeatRule) {
+            case 'daily':
+                nextDate = new Date(currentDate);
+                nextDate.setDate(nextDate.getDate() + 1);
+                break;
+            case 'weekly':
+                nextDate = new Date(currentDate);
+                nextDate.setDate(nextDate.getDate() + 7);
+                break;
+            case 'biweekly':
+                nextDate = new Date(currentDate);
+                nextDate.setDate(nextDate.getDate() + 14);
+                break;
+            case 'monthly':
+                nextDate = new Date(currentDate);
+                nextDate.setMonth(nextDate.getMonth() + 1);
+                break;
+            default:
+                return schedules;
+        }
+        
+        if (nextDate >= new Date(repeatUntil)) {
+            break;
+        }
+        
+        const newEndDate = new Date(nextDate.getTime() + duration);
+        schedules.push({
+            ...schedule,
+            id: `schedule-${Date.now()}-${schedules.length}`,
+            startTime: nextDate.toISOString(),
+            endTime: newEndDate.toISOString(),
+        });
+        
+        currentDate = nextDate;
+    }
+    
+    return schedules;
+};
+
+const ScheduleProvider = ({ children }) => {
+    const [schedules, setSchedules] = useState([]);
+    
+    const addSchedule = (schedule) => {
+        const newSchedule = {
+            ...schedule,
+            id: `schedule-${Date.now()}`,
+            startTime: new Date(schedule.startTime).toISOString(),
+            endTime: new Date(schedule.endTime).toISOString(),
+        };
+        
+        if (schedule.repeatRule && schedule.repeatRule !== 'none' && schedule.repeatUntil) {
+            const generatedSchedules = generateRepeatSchedules(newSchedule, schedule.repeatRule, schedule.repeatUntil);
+            setSchedules(prev => [...prev, ...generatedSchedules]);
+        } else {
+            setSchedules(prev => [...prev, newSchedule]);
+        }
+    };
+    
+    const deleteSchedule = (id) => {
+        setSchedules(prev => prev.filter(s => s.id !== id));
+    };
+    
+    const updateSchedule = (id, updates) => {
+        setSchedules(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
+    };
+    
+    const getAllSchedules = () => {
+        // 合并 mockCalendarEvents 和动态添加的 schedules
+        return [...mockCalendarEvents, ...schedules];
+    };
+    
+    return (
+        <ScheduleContext.Provider value={{ schedules, addSchedule, deleteSchedule, updateSchedule, getAllSchedules }}>
+            {children}
+        </ScheduleContext.Provider>
+    );
+};
+
+const useSchedule = () => useContext(ScheduleContext);
+
 // --- Helper Components ---
 
 /**
@@ -436,6 +534,262 @@ const PriorityChip = ({ priority, isSelected, onClick }) => {
 };
 
 // --- Modal Components ---
+
+/**
+ * Add Schedule Modal - 添加课程/日程
+ */
+const AddScheduleModal = () => {
+    const { closeModal } = useApp();
+    const { addSchedule } = useSchedule();
+    const { language } = useTranslation();
+    const isEn = language === 'en';
+    
+    const [courseName, setCourseName] = useState("");
+    const [courseCode, setCourseCode] = useState("");
+    const [type, setType] = useState(isEn ? "Course" : "课程");
+    const [lecturer, setLecturer] = useState("");
+    const [location, setLocation] = useState("");
+    const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+    const [startTime, setStartTime] = useState("09:00");
+    const [duration, setDuration] = useState(1);
+    const [repeatRule, setRepeatRule] = useState("none");
+    const [repeatUntil, setRepeatUntil] = useState(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10));
+    
+    const types = isEn ? ["Course", "Meeting", "Lab", "Seminar", "Other"] : ["课程", "会议", "实验", "研讨", "其他"];
+    const repeatRules = isEn 
+        ? ["None", "Daily", "Weekly", "Biweekly", "Monthly"]
+        : ["无", "每天", "每周", "每两周", "每月"];
+    const repeatRuleValues = ["none", "daily", "weekly", "biweekly", "monthly"];
+    
+    const handleSubmit = () => {
+        if (!courseName || !startTime || !date) {
+            alert(isEn ? "Please fill in required fields" : "请填写必填项");
+            return;
+        }
+        
+        // 计算结束时间
+        const startDateTime = new Date(`${date}T${startTime}`);
+        const endDateTime = new Date(startDateTime.getTime() + duration * 60 * 60 * 1000);
+        
+        const newSchedule = {
+            course: courseName,
+            courseCode: courseCode || "",
+            type: type,
+            lecturer: lecturer || "",
+            location: location || "",
+            startTime: startDateTime.toISOString(),
+            endTime: endDateTime.toISOString(),
+            repeatRule: repeatRule === "none" ? "none" : repeatRule,
+            repeatUntil: repeatRule === "none" ? null : repeatUntil,
+        };
+        
+        addSchedule(newSchedule);
+        closeModal();
+        alert(isEn ? "Schedule added successfully!" : "日程添加成功！");
+    };
+    
+    return (
+        <div className="p-4 space-y-6">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                {isEn ? 'Add Schedule' : '添加日程'}
+            </h2>
+            
+            {/* 基本信息 */}
+            <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+                <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
+                    {isEn ? 'Basic Information' : '基本信息'}
+                </h3>
+                
+                {/* 课程名称 */}
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {isEn ? 'Course Name' : '课程名称'} <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        value={courseName}
+                        onChange={(e) => setCourseName(e.target.value)}
+                        placeholder={isEn ? "Enter course name" : "输入课程名称"}
+                        className="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500"
+                    />
+                </div>
+                
+                {/* 课程代码 */}
+                <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {isEn ? 'Course Code' : '课程代码'}
+                        </label>
+                        <input
+                            type="text"
+                            value={courseCode}
+                            onChange={(e) => setCourseCode(e.target.value)}
+                            placeholder={isEn ? "e.g., CS101" : "例如: CS101"}
+                            className="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500"
+                        />
+                    </div>
+                    
+                    {/* 类型 */}
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {isEn ? 'Type' : '类型'}
+                        </label>
+                        <select
+                            value={type}
+                            onChange={(e) => setType(e.target.value)}
+                            className="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white"
+                        >
+                            {types.map(t => <option key={t} value={t}>{t}</option>)}
+                        </select>
+                    </div>
+                </div>
+                
+                {/* 讲师和地点 */}
+                <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {isEn ? 'Lecturer' : '讲师'}
+                        </label>
+                        <input
+                            type="text"
+                            value={lecturer}
+                            onChange={(e) => setLecturer(e.target.value)}
+                            placeholder={isEn ? "Enter lecturer name" : "输入讲师名称"}
+                            className="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500"
+                        />
+                    </div>
+                    
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {isEn ? 'Location' : '地点'}
+                        </label>
+                        <input
+                            type="text"
+                            value={location}
+                            onChange={(e) => setLocation(e.target.value)}
+                            placeholder={isEn ? "e.g., Room 101" : "例如: 101教室"}
+                            className="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500"
+                        />
+                    </div>
+                </div>
+            </div>
+            
+            {/* 时间信息 */}
+            <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+                <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
+                    {isEn ? 'Time Information' : '时间信息'}
+                </h3>
+                
+                {/* 日期和开始时间 */}
+                <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {isEn ? 'Date' : '日期'} <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="date"
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                            className="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white"
+                        />
+                    </div>
+                    
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {isEn ? 'Start Time' : '开始时间'} <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="time"
+                            value={startTime}
+                            onChange={(e) => setStartTime(e.target.value)}
+                            className="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white"
+                        />
+                    </div>
+                </div>
+                
+                {/* 时长 */}
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {isEn ? 'Duration (hours)' : '时长(小时)'}
+                    </label>
+                    <div className="flex items-center space-x-2">
+                        <input
+                            type="range"
+                            min="0.5"
+                            max="8"
+                            step="0.5"
+                            value={duration}
+                            onChange={(e) => setDuration(parseFloat(e.target.value))}
+                            className="flex-1 h-2 bg-gray-300 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                        />
+                        <div className="w-16 p-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-center text-gray-900 dark:text-white font-medium">
+                            {duration}h
+                        </div>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {isEn ? `End time: ${new Date(new Date(`${date}T${startTime}`).getTime() + duration * 60 * 60 * 1000).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'})}` : `结束时间: ${new Date(new Date(`${date}T${startTime}`).getTime() + duration * 60 * 60 * 1000).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'})}`}
+                    </p>
+                </div>
+            </div>
+            
+            {/* 重复设置 */}
+            <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+                <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
+                    {isEn ? 'Repeat Settings' : '重复设置'}
+                </h3>
+                
+                {/* 重复规则 */}
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {isEn ? 'Repeat Rule' : '重复规则'}
+                    </label>
+                    <select
+                        value={repeatRule}
+                        onChange={(e) => setRepeatRule(e.target.value)}
+                        className="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white"
+                    >
+                        {repeatRules.map((rule, idx) => (
+                            <option key={rule} value={repeatRuleValues[idx]}>
+                                {rule}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                
+                {/* 重复截止日期 */}
+                {repeatRule !== "none" && (
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {isEn ? 'Repeat Until' : '重复截止日期'}
+                        </label>
+                        <input
+                            type="date"
+                            value={repeatUntil}
+                            onChange={(e) => setRepeatUntil(e.target.value)}
+                            className="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white"
+                        />
+                    </div>
+                )}
+            </div>
+            
+            {/* 提交按钮 */}
+            <div className="flex gap-3 pt-4">
+                <button
+                    onClick={closeModal}
+                    className="flex-1 py-3 px-4 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600"
+                >
+                    {isEn ? 'Cancel' : '取消'}
+                </button>
+                <button
+                    onClick={handleSubmit}
+                    className="flex-1 py-3 px-4 bg-violet-600 text-white rounded-lg font-medium hover:bg-violet-700"
+                >
+                    {isEn ? 'Add Schedule' : '添加日程'}
+                </button>
+            </div>
+        </div>
+    );
+};
 
 /**
  * Add Todo Modal (from AddTodoView.swift)
@@ -1978,6 +2332,8 @@ const StudentDayView = ({ selectedDate, setSelectedDate, events }) => {
  */
 const CalendarPage = ({ t }) => {
     const { language } = useTranslation();
+    const { openModal } = useApp();
+    const { getAllSchedules } = useSchedule();
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [viewMode, setViewMode] = useState("day");
     
@@ -1987,7 +2343,9 @@ const CalendarPage = ({ t }) => {
         { id: "month", label: language === 'en' ? 'Month' : '月' },
     ];
     
-    const todayEvents = mockCalendarEvents.filter(e => 
+    // 获取所有日程（包括动态添加的）
+    const allEvents = getAllSchedules();
+    const todayEvents = allEvents.filter(e => 
         new Date(e.startTime).toDateString() === selectedDate.toDateString()
     );
     
@@ -1995,16 +2353,19 @@ const CalendarPage = ({ t }) => {
         <div className="space-y-5">
             <div className="flex justify-between items-center">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{language === 'en' ? 'Calendar' : '日历'}</h1>
-                <button className="p-2 bg-violet-600 text-white rounded-full shadow hover:bg-violet-700">
+                <button 
+                    onClick={() => openModal('addSchedule')}
+                    className="p-2 bg-violet-600 text-white rounded-full shadow hover:bg-violet-700 transition-colors"
+                >
                     <Plus className="w-5 h-5" />
                 </button>
             </div>
             <SegmentedControl tabs={tabs} selected={viewMode} setSelected={setViewMode} />
             
             <div className="p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-sm">
-                {viewMode === 'month' && <StudentMonthView selectedDate={selectedDate} setSelectedDate={setSelectedDate} events={mockCalendarEvents} />}
-                {viewMode === 'week' && <StudentWeekView selectedDate={selectedDate} setSelectedDate={setSelectedDate} events={mockCalendarEvents} />}
-                {viewMode === 'day' && <StudentDayView selectedDate={selectedDate} setSelectedDate={setSelectedDate} events={mockCalendarEvents} />}
+                {viewMode === 'month' && <StudentMonthView selectedDate={selectedDate} setSelectedDate={setSelectedDate} events={allEvents} />}
+                {viewMode === 'week' && <StudentWeekView selectedDate={selectedDate} setSelectedDate={setSelectedDate} events={allEvents} />}
+                {viewMode === 'day' && <StudentDayView selectedDate={selectedDate} setSelectedDate={setSelectedDate} events={allEvents} />}
             </div>
             
             {viewMode !== 'week' && (
@@ -2019,8 +2380,8 @@ const CalendarPage = ({ t }) => {
                                     courseCode: event.courseCode,
                                     lecturer: event.lecturer,
                                     location: event.location, 
-                                    startTime: new Date(event.startTime).toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'}), 
-                                    endTime: new Date(event.endTime).toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'}), 
+                                    startTime: new Date(event.startTime).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'}), 
+                                    endTime: new Date(event.endTime).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'}), 
                                     type: event.type 
                                 }}
                             />
@@ -2835,7 +3196,9 @@ const SettingsPage = ({ onLogout, language, setLanguage, t }) => {
 export default function App({ onLogout }) {
     return (
         <AppProvider>
-            <MainApp onLogout={onLogout} />
+            <ScheduleProvider>
+                <MainApp onLogout={onLogout} />
+            </ScheduleProvider>
         </AppProvider>
     );
 }
@@ -2869,6 +3232,9 @@ function MainApp({ onLogout }) {
 
         let content;
         switch (activeModal.type) {
+            case 'addSchedule':
+                content = <AddScheduleModal />;
+                break;
             case 'addTodo':
                 content = <AddTodoModal />;
                 break;
