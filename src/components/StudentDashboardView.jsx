@@ -2668,7 +2668,14 @@ const AIAssistant = () => {
             
             const genAI = new GoogleGenerativeAI(apiKey);
             const model = genAI.getGenerativeModel({ 
-                model: "gemini-1.5-flash"
+                model: "gemini-1.5-flash",
+                // 添加请求配置避免 CORS 问题
+                generationConfig: {
+                    temperature: 0.7,
+                    topK: 40,
+                    topP: 0.95,
+                    maxOutputTokens: 1024,
+                }
             });
             
             // 构建上下文提示
@@ -2692,9 +2699,18 @@ const AIAssistant = () => {
             console.error('AI 调用失败:', error);
             setApiKeyError(true);
             
+            let errorText = `❌ API 调用失败：${error.message}\n\n`;
+            
+            // 检查是否是 referrer 限制错误
+            if (error.message.includes('API_KEY_HTTP_REFERRER_BLOCKED') || error.message.includes('403')) {
+                errorText += `**原因：** API Key 被 HTTP Referrer 限制阻止\n\n**解决方案：**\n1. 访问 [Google AI Studio API Keys](https://aistudio.google.com/app/apikey)\n2. 找到你的 API Key，点击编辑\n3. 在 "Application restrictions" 中：\n   - 选择 "HTTP referrers (websites)"\n   - 添加你的网站域名：\`https://shiny-space-train-7vvrjwjvwvxpcx4jv-5173.app.github.dev/*\`\n   - 或者暂时选择 "None" 来移除限制（仅供测试）\n4. 保存后等待几分钟生效\n\n**临时方案：** 创建一个新的 API Key 并选择 "None" 作为限制类型`;
+            } else {
+                errorText += `**解决方案：**\n1. 确保你有有效的 Google AI API Key\n2. 在项目根目录的 \`.env\` 文件中设置：\n   \`VITE_GOOGLE_AI_API_KEY=your_actual_api_key\`\n3. 重新启动开发服务器（npm run dev）\n\n如需获取 API Key，请访问 [Google AI Studio](https://aistudio.google.com/app/apikey)`;
+            }
+            
             const errorMessage = {
                 id: Date.now() + 1,
-                text: `❌ API 调用失败：${error.message}\n\n**解决方案：**\n1. 确保你有有效的 Google AI API Key\n2. 在项目根目录的 \`.env\` 文件中设置：\n   \`VITE_GOOGLE_AI_API_KEY=your_actual_api_key\`\n3. 重新启动开发服务器（npm run dev）\n\n如需获取 API Key，请访问 [Google AI Studio](https://aistudio.google.com/app/apikey)`,
+                text: errorText,
                 isUser: false,
                 isError: true
             };
@@ -2755,26 +2771,27 @@ const AIAssistant = () => {
                                 ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800'
                                 : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm'
                         }`}>
-                            <ReactMarkdown 
-                                className="text-sm prose prose-sm dark:prose-invert max-w-none"
-                                components={{
-                                    p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />,
-                                    ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-2" {...props} />,
-                                    ol: ({node, ...props}) => <ol className="list-decimal pl-4 mb-2" {...props} />,
-                                    li: ({node, ...props}) => <li className="mb-1" {...props} />,
-                                    strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
-                                    h1: ({node, ...props}) => <h1 className="text-lg font-bold mb-2 mt-3" {...props} />,
-                                    h2: ({node, ...props}) => <h2 className="text-base font-bold mb-2 mt-2" {...props} />,
-                                    h3: ({node, ...props}) => <h3 className="text-sm font-bold mb-1 mt-2" {...props} />,
-                                    hr: ({node, ...props}) => <hr className="my-3 border-gray-300 dark:border-gray-600" {...props} />,
-                                    table: ({node, ...props}) => <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-600 my-2" {...props} />,
-                                    th: ({node, ...props}) => <th className="px-3 py-1 text-left text-xs font-medium uppercase" {...props} />,
-                                    td: ({node, ...props}) => <td className="px-3 py-1 text-sm" {...props} />,
-                                    a: ({node, ...props}) => <a className="text-blue-600 dark:text-blue-400 underline" {...props} />,
-                                }}
-                            >
-                                {msg.text}
-                            </ReactMarkdown>
+                            <div className="text-sm prose prose-sm dark:prose-invert max-w-none">
+                                <ReactMarkdown 
+                                    components={{
+                                        p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />,
+                                        ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-2" {...props} />,
+                                        ol: ({node, ...props}) => <ol className="list-decimal pl-4 mb-2" {...props} />,
+                                        li: ({node, ...props}) => <li className="mb-1" {...props} />,
+                                        strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
+                                        h1: ({node, ...props}) => <h1 className="text-lg font-bold mb-2 mt-3" {...props} />,
+                                        h2: ({node, ...props}) => <h2 className="text-base font-bold mb-2 mt-2" {...props} />,
+                                        h3: ({node, ...props}) => <h3 className="text-sm font-bold mb-1 mt-2" {...props} />,
+                                        hr: ({node, ...props}) => <hr className="my-3 border-gray-300 dark:border-gray-600" {...props} />,
+                                        table: ({node, ...props}) => <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-600 my-2" {...props} />,
+                                        th: ({node, ...props}) => <th className="px-3 py-1 text-left text-xs font-medium uppercase" {...props} />,
+                                        td: ({node, ...props}) => <td className="px-3 py-1 text-sm" {...props} />,
+                                        a: ({node, ...props}) => <a className="text-blue-600 dark:text-blue-400 underline" {...props} />,
+                                    }}
+                                >
+                                    {msg.text}
+                                </ReactMarkdown>
+                            </div>
                         </div>
                     </div>
                 ))}
