@@ -9,36 +9,60 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [userType, setUserType] = useState(null) // 'student' or 'parent'
   const [debugMsg, setDebugMsg] = useState('')
+  const [isInitialized, setIsInitialized] = useState(false)
 
-  // 支持通过 URL hash 直达角色视图，例如 #student 或 #parent
+  // 初始化：从 localStorage 或 URL hash 恢复登录状态
   useEffect(() => {
     const hash = (window.location.hash || '').replace('#', '')
+    const savedUserType = localStorage.getItem('userType')
+    
     if (hash === 'student' || hash === 'parent') {
-      setDebugMsg(`URL hash detected: ${hash}`)
+      // URL hash 优先
+      setDebugMsg(`✅ URL hash detected: #${hash}`)
       setUserType(hash)
       setIsLoggedIn(true)
+      localStorage.setItem('userType', hash)
+    } else if (savedUserType && (savedUserType === 'student' || savedUserType === 'parent')) {
+      // 恢复 localStorage 中的登录状态
+      setDebugMsg(`✅ Restored from localStorage: ${savedUserType}`)
+      setUserType(savedUserType)
+      setIsLoggedIn(true)
+      window.location.hash = `#${savedUserType}`
+    } else {
+      // 未登录状态
+      setDebugMsg('❌ No saved state, showing login')
+      localStorage.removeItem('userType')
+      window.location.hash = ''
     }
+    
+    setIsInitialized(true)
   }, [])
 
   const handleLogin = (type) => {
-    setDebugMsg(`Login clicked: ${type}`)
+    setDebugMsg(`✅ Login clicked: ${type}`)
     setUserType(type)
     setIsLoggedIn(true)
-    // 将角色写入 URL，便于刷新/直达与线上排障
-    try {
-      window.location.hash = `#${type}`
-    } catch {}
+    // 保存登录状态
+    localStorage.setItem('userType', type)
+    // 将角色写入 URL
+    window.location.hash = `#${type}`
   }
 
   const handleLogout = () => {
-    setDebugMsg('Logout')
+    setDebugMsg('🚪 Logout')
     setIsLoggedIn(false)
     setUserType(null)
+    localStorage.removeItem('userType')
     window.location.hash = ''
   }
 
   // 开发调试：显示当前状态（仅在本地或需要排障时可见）
   const showDebug = import.meta.env.DEV || window.location.search.includes('debug=1')
+  
+  // 等待初始化完成
+  if (!isInitialized) {
+    return <div style={{display:'flex', justifyContent:'center', alignItems:'center', height:'100vh', background:'#f0f0f0'}}>Loading...</div>
+  }
   
   // 显示登录页面
   if (!isLoggedIn) {
