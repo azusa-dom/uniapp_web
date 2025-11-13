@@ -1,4 +1,9 @@
-import { courseTranslations, activitiesTranslations, todoTranslations, emailTranslations } from './courseTranslations';
+import { courseTranslations, activitiesTranslations, todoTranslations, emailTranslations, uiTranslations } from './courseTranslations';
+
+// 获取UI文本翻译
+export const getUIText = (key, language = 'zh') => {
+  return uiTranslations[language]?.[key] || key;
+};
 
 // 获取课程翻译
 export const getCourseName = (courseId, language = 'zh') => {

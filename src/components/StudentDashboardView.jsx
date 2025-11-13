@@ -387,6 +387,7 @@ const TrendIcon = ({ trend }) => {
  * Priority Chip
  */
 const PriorityChip = ({ priority, isSelected, onClick }) => {
+    const { language } = useTranslation();
     const styles = {
         high: {
             bg: isSelected ? "bg-red-500" : "bg-red-100 dark:bg-red-900/50",
@@ -405,6 +406,11 @@ const PriorityChip = ({ priority, isSelected, onClick }) => {
         },
     };
     const style = styles[priority] || styles.medium;
+    const priorityLabels = {
+        high: language === 'en' ? 'High' : '高',
+        medium: language === 'en' ? 'Medium' : '中',
+        low: language === 'en' ? 'Low' : '低',
+    };
 
     return (
         <button
@@ -413,7 +419,7 @@ const PriorityChip = ({ priority, isSelected, onClick }) => {
         >
             <div className="flex items-center justify-center space-x-2">
                 <Flag className="w-4 h-4" />
-                <span className="font-medium text-sm capitalize">{priority === 'high' ? '高' : priority === 'medium' ? '中' : '低'}</span>
+                <span className="font-medium text-sm capitalize">{priorityLabels[priority]}</span>
             </div>
         </button>
     );
@@ -426,20 +432,21 @@ const PriorityChip = ({ priority, isSelected, onClick }) => {
  */
 const AddTodoModal = () => {
     const { closeModal, addTodo } = useApp();
+    const { language } = useTranslation();
     const [title, setTitle] = useState("");
-    const [category, setCategory] = useState("作业");
+    const [category, setCategory] = useState(language === 'en' ? "Assignment" : "作业");
     const [priority, setPriority] = useState("medium");
     const [dueDate, setDueDate] = useState(new Date().toISOString().slice(0, 16));
     const [hasDueDate, setHasDueDate] = useState(true);
     const [notes, setNotes] = useState("");
 
-    const categories = ["作业", "考试", "项目", "阅读", "实验", "论文", "其他"];
+    const categories = language === 'en' 
+        ? ["Assignment", "Exam", "Project", "Reading", "Experiment", "Essay", "Other"]
+        : ["作业", "考试", "项目", "阅读", "实验", "论文", "其他"];
 
     const handleSubmit = () => {
         if (!title) {
-            // In a real app, use a better notification
-            // For this environment, we'll avoid alert()
-            console.error("请输入标题");
+            console.error(language === 'en' ? "Please enter title" : "请输入标题");
             return;
         }
         addTodo({
@@ -454,19 +461,19 @@ const AddTodoModal = () => {
 
     return (
         <div className="p-4 space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">添加待办事项</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{language === 'en' ? 'Add Todo' : '添加待办事项'}</h2>
 
             {/* Title */}
             <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
                     <FileText className="w-4 h-4 mr-2 text-indigo-500" />
-                    标题 <span className="text-red-500 ml-1">*</span>
+                    {language === 'en' ? 'Title' : '标题'} <span className="text-red-500 ml-1">*</span>
                 </label>
                 <input
                     type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    placeholder="请输入待办事项标题"
+                    placeholder={language === 'en' ? 'Enter todo title' : '请输入待办事项标题'}
                     className="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white"
                 />
             </div>
@@ -475,7 +482,7 @@ const AddTodoModal = () => {
             <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
                     <BookMarked className="w-4 h-4 mr-2 text-indigo-500" />
-                    分类
+                    {language === 'en' ? 'Category' : '分类'}
                 </label>
                 <div className="flex flex-wrap gap-2">
                     {categories.map(cat => (
@@ -498,7 +505,7 @@ const AddTodoModal = () => {
             <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
                     <Flag className="w-4 h-4 mr-2 text-indigo-500" />
-                    优先级
+                    {language === 'en' ? 'Priority' : '优先级'}
                 </label>
                 <div className="flex space-x-2">
                     <PriorityChip priority="low" isSelected={priority === 'low'} onClick={() => setPriority('low')} />
@@ -512,7 +519,7 @@ const AddTodoModal = () => {
                 <div className="flex justify-between items-center">
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
                         <CalendarIcon className="w-4 h-4 mr-2 text-indigo-500" />
-                        截止日期
+                        {language === 'en' ? 'Due Date' : '截止日期'}
                     </label>
                     <input
                         type="checkbox"
@@ -535,14 +542,14 @@ const AddTodoModal = () => {
             <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
                     <Info className="w-4 h-4 mr-2 text-indigo-500" />
-                    备注
+                    {language === 'en' ? 'Notes' : '备注'}
                 </label>
                 <textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     rows="3"
                     className="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white"
-                    placeholder="添加更多详情..."
+                    placeholder={language === 'en' ? 'Add more details...' : '添加更多详情...'}
                 />
             </div>
 
@@ -552,7 +559,7 @@ const AddTodoModal = () => {
                 className="w-full py-4 px-6 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-md flex items-center justify-center space-x-2 transition-all"
             >
                 <Plus className="w-5 h-5" />
-                <span>添加待办事项</span>
+                <span>{language === 'en' ? 'Add Todo' : '添加待办事项'}</span>
             </button>
         </div>
     );
@@ -766,23 +773,24 @@ const MedicalRecordsModal = () => {
  * Prescriptions Modal (from PrescriptionsView.swift)
  */
 const PrescriptionsModal = () => {
+    const { language } = useTranslation();
     return (
         <div className="p-4 space-y-4">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">处方记录</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{language === 'en' ? 'Prescriptions' : '处方记录'}</h2>
             <div className="space-y-3">
                 {mockPrescriptions.map(p => (
                     <div key={p.id} className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
                         <div className="flex justify-between items-center mb-2">
                             <span className="font-semibold text-gray-900 dark:text-white">{p.medicationName} <span className="text-sm font-normal text-gray-500 dark:text-gray-400">{p.specification}</span></span>
                             <span className={`py-1 px-3 text-xs font-medium rounded-full ${p.status === 'active' ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}`}>
-                                {p.status === 'active' ? '使用中' : '已完成'}
+                                {p.status === 'active' ? (language === 'en' ? 'Active' : '使用中') : (language === 'en' ? 'Completed' : '已完成')}
                             </span>
                         </div>
                         <p className="text-sm text-gray-600 dark:text-gray-400">{p.dosage}</p>
                         {p.status === 'active' && (
                             <div className="mt-2">
                                 <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400 mb-1">
-                                    <span>剩余</span>
+                                    <span>{language === 'en' ? 'Remaining' : '剩余'}</span>
                                     <span>{p.remainingQuantity}/{p.totalQuantity}</span>
                                 </div>
                                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
@@ -796,7 +804,7 @@ const PrescriptionsModal = () => {
                         {p.reminderEnabled && (
                             <p className="text-sm text-indigo-600 dark:text-indigo-400 mt-2 flex items-center">
                                 <Bell className="w-4 h-4 mr-1" />
-                                提醒: {p.reminderTime}
+                                {language === 'en' ? 'Reminder' : '提醒'}: {p.reminderTime}
                             </p>
                         )}
                     </div>
@@ -1327,8 +1335,9 @@ const EmailDetailModal = ({ emailId }) => {
  * Module Detail Modal (from StudentAcademicsView.swift)
  */
 const ModuleDetailModal = ({ moduleId }) => {
+    const { language } = useTranslation();
     const module = mockModules.find(m => m.id === moduleId);
-    if (!module) return <div className="p-4 text-gray-900 dark:text-white">课程未找到</div>;
+    if (!module) return <div className="p-4 text-gray-900 dark:text-white">{language === 'en' ? 'Course not found' : '课程未找到'}</div>;
 
     const markColor = (mark) => {
         if (mark >= 80) return "text-green-600 dark:text-green-400";
@@ -1344,14 +1353,14 @@ const ModuleDetailModal = ({ moduleId }) => {
             
             <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
                 <div className="flex justify-between items-center">
-                    <span className="text-lg font-medium text-gray-800 dark:text-gray-200">总成绩</span>
+                    <span className="text-lg font-medium text-gray-800 dark:text-gray-200">{language === 'en' ? 'Total Score' : '总成绩'}</span>
                     <span className={`text-4xl font-bold ${markColor(module.mark)}`}>{module.mark > 0 ? module.mark : 'N/A'}</span>
                 </div>
             </div>
 
             {module.gradeBreakdown.length > 0 && (
                 <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow space-y-3">
-                    <h3 className="font-semibold text-gray-900 dark:text-white">成绩构成</h3>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{language === 'en' ? 'Grade Breakdown' : '成绩构成'}</h3>
                     {module.gradeBreakdown.map(item => (
                         <div key={item.component}>
                             <div className="flex justify-between text-sm text-gray-600 dark:text-gray-300 mb-1">
@@ -1368,7 +1377,7 @@ const ModuleDetailModal = ({ moduleId }) => {
 
             {module.assignmentList.length > 0 && (
                 <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow space-y-3">
-                    <h3 className="font-semibold text-gray-900 dark:text-white">作业列表</h3>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{language === 'en' ? 'Assignment List' : '作业列表'}</h3>
                     {module.assignmentList.map(item => (
                         <div key={item.id} className="flex justify-between items-center text-sm">
                             <div className="flex items-center">
@@ -1379,7 +1388,7 @@ const ModuleDetailModal = ({ moduleId }) => {
                                 <span className="text-gray-700 dark:text-gray-300">{item.name}</span>
                             </div>
                             <span className={`font-medium ${item.submitted ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}>
-                                {item.submitted ? `${item.grade}/100` : `截止: ${item.dueDate}`}
+                                {item.submitted ? `${item.grade}/100` : `${language === 'en' ? 'Due' : '截止'}: ${item.dueDate}`}
                             </span>
                         </div>
                     ))}
@@ -1602,7 +1611,7 @@ const Academics = ({ t }) => {
     const [selectedTab, setSelectedTab] = useState("modules");
     const tabs = [
         { id: "modules", label: t('student.courses') },
-        { id: "schedule", label: "课程表" }
+        { id: "schedule", label: language === 'en' ? 'Schedule' : '课程表' }
     ];
     
     const validModules = mockModules.filter(m => m.mark > 0);
@@ -1957,14 +1966,15 @@ const StudentDayView = ({ selectedDate, setSelectedDate, events }) => {
 /**
  * Page: Calendar (from StudentCalendarView.swift)
  */
-const CalendarPage = () => {
+const CalendarPage = ({ t }) => {
+    const { language } = useTranslation();
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [viewMode, setViewMode] = useState("day");
     
     const tabs = [
-        { id: "day", label: "日" },
-        { id: "week", label: "周" },
-        { id: "month", label: "月" },
+        { id: "day", label: language === 'en' ? 'Day' : '日' },
+        { id: "week", label: language === 'en' ? 'Week' : '周' },
+        { id: "month", label: language === 'en' ? 'Month' : '月' },
     ];
     
     const todayEvents = mockCalendarEvents.filter(e => 
@@ -1974,7 +1984,7 @@ const CalendarPage = () => {
     return (
         <div className="space-y-5">
             <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">日历</h1>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{language === 'en' ? 'Calendar' : '日历'}</h1>
                 <button className="p-2 bg-violet-600 text-white rounded-full shadow hover:bg-violet-700">
                     <Plus className="w-5 h-5" />
                 </button>
@@ -1989,7 +1999,7 @@ const CalendarPage = () => {
             
             {viewMode !== 'week' && (
                 <div className="space-y-3">
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">今日日程</h3>
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">{language === 'en' ? 'Today\'s Schedule' : '今日日程'}</h3>
                     {todayEvents.length > 0 ? (
                         todayEvents.map(event => (
                             <ModernEventCard 
@@ -2008,7 +2018,7 @@ const CalendarPage = () => {
                     ) : (
                         <div className="p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-sm text-center text-gray-400 dark:text-gray-500">
                             <Book size={32} className="mx-auto mb-2 opacity-50" />
-                            <p>今天没有课程安排</p>
+                            <p>{language === 'en' ? 'No classes scheduled for today' : '今天没有课程安排'}</p>
                         </div>
                     )}
                 </div>

@@ -145,3 +145,155 @@ export const emailTranslations = {
     M12: { sender: 'Dr. Sarah Jenkins', title: 'Biostatistics Paper Guidance Appointment', excerpt: 'Zoya, I see you\'ve booked a 3pm paper guidance meeting Thursday. Please prepare your draft in advance...' },
   },
 };
+
+// 通用UI文本翻译
+export const uiTranslations = {
+  zh: {
+    // 待办事项分类
+    'assignment': '作业',
+    'exam': '考试',
+    'project': '项目',
+    'reading': '阅读',
+    'experiment': '实验',
+    'essay': '论文',
+    'other': '其他',
+    
+    // 优先级
+    'low': '低',
+    'medium': '中',
+    'high': '高',
+    
+    // 课程页面标签
+    'my-courses': '我的课程',
+    'core-courses': '核心课程',
+    'ongoing-courses': '继续课程',
+    'completed': '已完成',
+    'schedule': '课程表',
+    
+    // 成绩相关
+    'total-score': '总成绩',
+    'grade-breakdown': '成绩构成',
+    'assignment-list': '作业列表',
+    'course-not-found': '课程未找到',
+    'submitted': '已提交',
+    'due': '截止',
+    'completed-courses': '已完成的课程',
+    'ongoing': '进行中',
+    
+    // 健康相关
+    'medical-records': '就诊历史',
+    'prescriptions': '处方记录',
+    'appointment-booking': '预约面诊',
+    'allergies': '过敏史',
+    'active': '使用中',
+    'completed-status': '已完成',
+    
+    // 活动相关
+    'activities-title': '校园活动',
+    'activities-subtitle': '发现精彩的UCL校园活动',
+    'no-events': '暂无该类型的活动',
+    'check-back-later': '稍后再来看看吧',
+    
+    // 模态框标签
+    'add-todo': '添加待办事项',
+    'title': '标题',
+    'required': '必填',
+    'category': '分类',
+    'priority': '优先级',
+    'due-date': '截止日期',
+    'notes': '备注',
+    'add-button': '添加',
+    'please-enter-title': '请输入标题',
+    'enter-title': '请输入待办事项标题',
+    'add-more-details': '添加更多详情...',
+    
+    // 日历相关
+    'today': '今日',
+    '7-days': '7天',
+    'calendar': '日历',
+    
+    // 课程类型
+    'lecture': '讲座',
+    'tutorial': '实验课',
+    'seminar': '研讨会',
+    'revision': '复习课',
+    
+    // 其他
+    'all-tasks-completed': '所有任务都已完成！',
+    'no-todos': '暂无待办事项',
+  },
+  en: {
+    // Assignment categories
+    'assignment': 'Assignment',
+    'exam': 'Exam',
+    'project': 'Project',
+    'reading': 'Reading',
+    'experiment': 'Experiment',
+    'essay': 'Essay',
+    'other': 'Other',
+    
+    // Priority
+    'low': 'Low',
+    'medium': 'Medium',
+    'high': 'High',
+    
+    // Course page tabs
+    'my-courses': 'My Courses',
+    'core-courses': 'Core Courses',
+    'ongoing-courses': 'Ongoing Courses',
+    'completed': 'Completed',
+    'schedule': 'Schedule',
+    
+    // Grades
+    'total-score': 'Total Score',
+    'grade-breakdown': 'Grade Breakdown',
+    'assignment-list': 'Assignment List',
+    'course-not-found': 'Course not found',
+    'submitted': 'Submitted',
+    'due': 'Due',
+    'completed-courses': 'Completed Courses',
+    'ongoing': 'Ongoing',
+    
+    // Health
+    'medical-records': 'Medical Records',
+    'prescriptions': 'Prescriptions',
+    'appointment-booking': 'Book Appointment',
+    'allergies': 'Allergies',
+    'active': 'Active',
+    'completed-status': 'Completed',
+    
+    // Activities
+    'activities-title': 'Campus Events',
+    'activities-subtitle': 'Discover exciting UCL campus events',
+    'no-events': 'No events of this type',
+    'check-back-later': 'Check back later',
+    
+    // Modal labels
+    'add-todo': 'Add Todo',
+    'title': 'Title',
+    'required': 'Required',
+    'category': 'Category',
+    'priority': 'Priority',
+    'due-date': 'Due Date',
+    'notes': 'Notes',
+    'add-button': 'Add',
+    'please-enter-title': 'Please enter title',
+    'enter-title': 'Enter todo title',
+    'add-more-details': 'Add more details...',
+    
+    // Calendar
+    'today': 'Today',
+    '7-days': '7 Days',
+    'calendar': 'Calendar',
+    
+    // Course types
+    'lecture': 'Lecture',
+    'tutorial': 'Tutorial',
+    'seminar': 'Seminar',
+    'revision': 'Revision',
+    
+    // Other
+    'all-tasks-completed': 'All tasks completed!',
+    'no-todos': 'No todos',
+  },
+};
