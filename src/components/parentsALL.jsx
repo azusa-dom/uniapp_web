@@ -62,6 +62,7 @@ import {
     emails as sharedEmails,
     emailDetails as sharedEmailDetails,
     todoItems as sharedTodoItems,
+    healthData, // ✅ 新增：健康数据与学生端共享
 } from '../mockData';
 
 // --- 数据模拟（改为统一来源） ---
@@ -83,27 +84,7 @@ const mockEmails = sharedEmails;
 // 邮件详情改为统一来源
 const mockEmailDetails = sharedEmailDetails;
 
-// Mock 健康数据
-const mockHealthData = {
-    day: [
-        { id: 1, icon: BedDouble, title: '睡眠', value: '7.5', unit: 'h', progress: 0.83, status: '良好', color: 'indigo-500' },
-        { id: 2, icon: Footprints, title: '步数', value: '8,234', unit: '步', progress: 0.82, status: '优秀', color: 'green-500' },
-        { id: 3, icon: Activity, title: '活跃', value: '45', unit: 'min', progress: 0.75, status: '良好', color: 'orange-500' },
-        { id: 4, icon: CupSoda, title: '饮水', value: '1.8', unit: 'L', progress: 0.72, status: '正常', color: 'blue-500' }
-    ],
-    week: [
-        { id: 1, icon: BedDouble, title: '平均睡眠', value: '7.2', unit: 'h', progress: 0.80, status: '良好', color: 'indigo-500' },
-        { id: 2, icon: Footprints, title: '平均步数', value: '7,856', unit: '步', progress: 0.79, status: '良好', color: 'green-500' },
-        { id: 3, icon: Activity, title: '总活跃', value: '5.2', unit: 'h', progress: 0.74, status: '良好', color: 'orange-500' },
-        { id: 4, icon: CupSoda, title: '平均饮水', value: '1.6', unit: 'L', progress: 0.64, status: '偏低', color: 'blue-500' }
-    ],
-    month: [
-        { id: 1, icon: BedDouble, title: '平均睡眠', value: '7.1', unit: 'h', progress: 0.79, status: '良好', color: 'indigo-500' },
-        { id: 2, icon: Footprints, title: '平均步数', value: '7,623', unit: '步', progress: 0.76, status: '良好', color: 'green-500' },
-        { id: 3, icon: Activity, title: '总活跃', value: '22', unit: 'h', progress: 0.73, status: '良好', color: 'orange-500' },
-        { id: 4, icon: CupSoda, title: '平均饮水', value: '1.5', unit: 'L', progress: 0.60, status: '偏低', color: 'blue-500' }
-    ]
-};
+
 
 // 学业数据：从统一 courses.completed 映射
 const mockCompletedCourses = courses.completed.map(c => {
@@ -1328,26 +1309,35 @@ const EmptyStateCard = ({ icon: Icon, message }) => (
 // --- 健康 (Health) 组件 ---
 // 对应 ParentHealthView.swift
 
-const ParentHealthView = ({ setModal }) => {
-    const [range, setRange] = useState('week'); // day, week, month
+const ParentHealthView = ({ setModal, language }) => {
+    // day, week, month
+    const [range, setRange] = useState('week');
+    const isEnglish = language === 'en';
+    const locale = isEnglish ? 'en-GB' : 'zh-CN';
+
     const rangeOptions = [
-        { label: '今日', value: 'day' },
-        { label: '7天', value: 'week' },
-        { label: '30天', value: 'month' }
+        { label: isEnglish ? 'Today' : '今日', value: 'day' },
+        { label: isEnglish ? '7 days' : '7天', value: 'week' },
+        { label: isEnglish ? '30 days' : '30天', value: 'month' }
     ];
 
-    const data = mockHealthData[range];
+    // ✅ 和学生端使用同一份 mockData.healthData
+    const data = healthData[range] || [];
 
     return (
         <div className="p-4 space-y-6">
-            <h2 className="text-3xl font-bold text-gray-900 px-1">健康</h2>
+            <h2 className="text-3xl font-bold text-gray-900 px-1">
+                {isEnglish ? 'Health Overview' : '健康总览'}
+            </h2>
             
+            {/* 时间范围切换 */}
             <SegmentedControl
                 options={rangeOptions}
                 selected={range}
                 setSelected={setRange}
             />
             
+            {/* 关键指标：睡眠、步数、专注、压力等（与学生端同步） */}
             <div className="grid grid-cols-2 gap-4">
                 {data.map(item => (
                     <ParentHealthCard 
@@ -1357,16 +1347,20 @@ const ParentHealthView = ({ setModal }) => {
                     />
                 ))}
             </div>
-            
-            <CareSection />
+
+            {/* 一键问诊 / 预约面诊 功能区 */}
+            <HealthServicesSection language={language} />
+
+            {/* 家长关怀建议 */}
+            <CareSection language={language} />
         </div>
     );
 };
 
 const ParentHealthCard = ({ item, onClick }) => {
     const Icon = item.icon;
+    // item.color 例如 'indigo-500'
     const colorClass = `text-${item.color}`;
-    const bgClass = `bg-${item.color}`;
     const progressBgClass = `bg-${item.color.split('-')[0]}-100`;
     const progressFillClass = `bg-${item.color}`;
 
@@ -1386,23 +1380,134 @@ const ParentHealthCard = ({ item, onClick }) => {
             <div className={`w-full ${progressBgClass} rounded-full h-1.5`}>
                 <div 
                     className={`${progressFillClass} h-1.5 rounded-full`}
-                    style={{ width: `${item.progress * 100}%` }}
+                    style={{ width: `${(item.progress || 0) * 100}%` }}
                 ></div>
             </div>
         </GlassCard>
     );
 };
 
-const CareSection = () => (
-    <GlassCard className="p-5">
-        <h3 className="text-lg font-bold text-gray-800 mb-3">关怀建议</h3>
-        <div className="space-y-3">
-            <ParentHealthTipRow icon={MoonStar} color="indigo-500" text="鼓励保持规律作息，避免熬夜" /> {/* Was: MoonStars */}
-            <ParentHealthTipRow icon={Footprints} color="green-500" text="一起制定每周运动计划" /> {/* Was: Walk */}
-            <ParentHealthTipRow icon={MessageCircle} color="violet-500" text="每周倾听孩子学习与情绪" />
-        </div>
-    </GlassCard>
-);
+/**
+ * ✅ 新增：健康服务区
+ * - 一键问诊（远程医疗咨询）
+ * - 预约面诊（几个大项：心理评估 / 过敏检测 / 身体检查 / 综合问诊）
+ * 这里是「功能预览」，给投资人看家长端能主动干预健康
+ */
+const HealthServicesSection = ({ language }) => {
+    const isEnglish = language === 'en';
+
+    const consultTitle = isEnglish ? 'One-tap Tele-consult' : '一键问诊';
+    const consultDesc = isEnglish
+        ? 'Students can reach our medical team anytime for remote consultation.'
+        : '学生可以随时联系健康团队进行远程医疗咨询。';
+
+    const bookingTitle = isEnglish ? 'Book On-site Appointment' : '预约面诊';
+    const bookingDesc = isEnglish
+        ? 'Parents can help students book key health services in advance.'
+        : '家长可以帮学生提前预约重点线下面诊服务。';
+
+    const categories = [
+        { key: 'psych',  zh: '心理评估',    en: 'Mental health review' },
+        { key: 'allergy', zh: '过敏检测',  en: 'Allergy screening' },
+        { key: 'check', zh: '身体检查',    en: 'Physical check-up' },
+        { key: 'general', zh: '综合问诊',  en: 'General consultation' },
+    ];
+
+    return (
+        <GlassCard className="p-5 space-y-4">
+            <div className="flex items-center justify-between mb-1">
+                <h3 className="text-lg font-bold text-gray-800">
+                    {isEnglish ? 'Smart Health Services' : '健康服务'}
+                </h3>
+                <Heart size={18} className="text-pink-500" />
+            </div>
+
+            {/* 一键问诊 */}
+            <button
+                type="button"
+                className="w-full flex items-center space-x-3 bg-gradient-to-r from-violet-500 to-indigo-500 rounded-xl px-4 py-3 text-white shadow-md hover:shadow-lg transition-all"
+            >
+                <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center flex-shrink-0">
+                    <MessageCircle size={20} />
+                </div>
+                <div className="flex-1 text-left">
+                    <p className="text-sm font-semibold">{consultTitle}</p>
+                    <p className="text-xs opacity-90 mt-0.5">{consultDesc}</p>
+                </div>
+                <ChevronRight size={18} className="opacity-80" />
+            </button>
+
+            {/* 预约面诊 */}
+            <GlassCard className="p-4 bg-white/80 border border-violet-100 space-y-3">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                        <CalendarPlus size={18} className="text-violet-600" />
+                        <p className="text-sm font-semibold text-gray-900">
+                            {bookingTitle}
+                        </p>
+                    </div>
+                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 font-medium">
+                        {isEnglish ? 'Student & parent linked' : '与学生端同步显示'}
+                    </span>
+                </div>
+                <p className="text-xs text-gray-600">{bookingDesc}</p>
+
+                {/* 几个大项标签 */}
+                <div className="flex flex-wrap gap-2 mt-1">
+                    {categories.map(cat => (
+                        <span
+                            key={cat.key}
+                            className="px-3 py-1 rounded-full text-xs font-medium bg-violet-50 text-violet-700 border border-violet-100"
+                        >
+                            {isEnglish ? cat.en : cat.zh}
+                        </span>
+                    ))}
+                </div>
+            </GlassCard>
+        </GlassCard>
+    );
+};
+
+const CareSection = ({ language }) => {
+    const isEnglish = language === 'en';
+
+    return (
+        <GlassCard className="p-5">
+            <h3 className="text-lg font-bold text-gray-800 mb-3">
+                {isEnglish ? 'Care tips for parents' : '关怀建议'}
+            </h3>
+            <div className="space-y-3">
+                <ParentHealthTipRow
+                    icon={MoonStar}
+                    color="indigo-500"
+                    text={
+                        isEnglish
+                            ? 'Encourage a regular sleep schedule and avoid late-night studying.'
+                            : '鼓励保持规律作息，尽量避免熬夜学习。'
+                    }
+                />
+                <ParentHealthTipRow
+                    icon={Footprints}
+                    color="green-500"
+                    text={
+                        isEnglish
+                            ? 'Plan light weekly exercise with your child, such as walking after class.'
+                            : '一起制定每周轻运动计划，比如课后散步。'
+                    }
+                />
+                <ParentHealthTipRow
+                    icon={MessageCircle}
+                    color="violet-500"
+                    text={
+                        isEnglish
+                            ? 'Have a weekly check-in to talk about study stress and emotions.'
+                            : '每周固定时间，聊一聊学习压力和情绪情况。'
+                    }
+                />
+            </div>
+        </GlassCard>
+    );
+};
 
 const ParentHealthTipRow = ({ icon: Icon, color, text }) => {
     const colorClass = `text-${color}`;
@@ -1999,7 +2104,7 @@ const ParentHealthDetailModal = ({ closeModal, item }) => {
                     <div className="space-y-3">
                         <ParentHealthTipRow icon={UserCheck} color="indigo-500" text="与孩子交流当前学习压力来源" />
                         <ParentHealthTipRow icon={CupSoda} color="amber-500" text="建立晚间放松例行活动" />
-                        <ParentHealthTipRow icon={Walk} color="green-500" text="鼓励晨间或课后散步" />
+                        <ParentHealthTipRow icon={Footprints} color="green-500" text="鼓励晨间或课后散步" />
                     </div>
                 </div>
             </div>
@@ -2338,7 +2443,7 @@ const App = ({ onLogout }) => {
             case 'calendar':
                 return <ParentCalendarView setModal={setModal} t={t} />;
             case 'health':
-                return <ParentHealthView setModal={setModal} t={t} />;
+                return <ParentHealthView setModal={setModal} language={language} />;
             case 'ai':
                 return <ParentAIAssistantView t={t} />;
             case 'mail':

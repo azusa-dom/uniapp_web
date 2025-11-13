@@ -83,8 +83,12 @@ const mockTodayClasses = calendarEvents
     id: e.id,
     name: e.course,
     code: e.courseCode,
-    time: `${new Date(e.startTime).toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})} - ${new Date(e.endTime).toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})}`,
-    location: e.location
+    // 用浏览器默认语言格式化时间，避免 zh-CN 写死和语法错误
+    time: new Date(e.startTime).toLocaleTimeString(undefined, {
+      hour: '2-digit',
+      minute: '2-digit',
+    }),
+    location: e.location,
   }));
 
 // 将 courses 数据转换为 modules 格式（学生端使用）
@@ -2062,88 +2066,155 @@ const ModernEventCard = ({ event }) => (
 
 
 /**
- * Page: Health (from StudentHealthView.swift)
+ * Health (from StudentHealthView.swift) - 简化版：只展示几个核心健康功能
  */
 const Health = ({ t }) => {
-    const { openModal } = useApp();
-    const { language } = useTranslation();
-    const [range, setRange] = useState("day");
-    const tabs = [
-        { id: "day", label: language === 'en' ? "Today" : "今日" },
-        { id: "week", label: language === 'en' ? "7 Days" : "7天" },
-    ];
-    const metrics = mockHealthMetrics[range];
+  const { openModal } = useApp();
+  const { language } = useTranslation();
+  const isEn = language === 'en';
 
-    const healthRecordTitles = {
-        medicalRecords: language === 'en' ? "Medical Records" : "就诊历史",
-        prescriptions: language === 'en' ? "Prescriptions" : "处方记录",
-        appointment: language === 'en' ? "Book Appointment" : "预约面诊",
-        allergies: language === 'en' ? "Allergies" : "过敏史"
-    };
+  const title = isEn ? 'Health Center' : '健康中心';
+  const subtitle = isEn
+    ? 'Key health services at a glance.'
+    : '常用健康服务一目了然。';
 
-    return (
-        <div className="space-y-5">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{language === 'en' ? 'Health' : '健康'}</h1>
-            
-            {/* Health Records */}
-            <div className="grid grid-cols-2 gap-3">
-                <HealthRecordButton title={healthRecordTitles.medicalRecords} icon={ClipboardList} color="#6366F1" count={mockMedicalRecords.length} onClick={() => openModal('medicalRecords')} />
-                <HealthRecordButton title={healthRecordTitles.prescriptions} icon={Pill} color="#EF4444" count={mockPrescriptions.filter(p => p.status === 'active').length} onClick={() => openModal('prescriptions')} />
-                <HealthRecordButton title={healthRecordTitles.appointment} icon={CalendarPlus} color="#10B981" count={0} onClick={() => openModal('appointmentBooking')} />
-                <HealthRecordButton title={healthRecordTitles.allergies} icon={AlertTriangle} color="#F59E0B" count={allergies.length} onClick={() => openModal('allergies')} />
-            </div>
+  const quickConsultTitle = isEn ? 'One-click consult' : '一键问诊';
+  const quickConsultDesc = isEn
+    ? 'Students can contact our medical team anytime for remote consultation.'
+    : '学生可以随时联系我们进行远程医疗咨询。';
 
-            <SegmentedControl tabs={tabs} selected={range} setSelected={setRange} />
-            
-            {/* Metrics Grid */}
-            <div className="grid grid-cols-2 gap-3">
-                {metrics.map(metric => (
-                    <HealthMetricCard key={metric.id} metric={metric} />
-                ))}
-            </div>
-            
-            {/* Tips Section */}
-            <div className="p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-sm space-y-3">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">{language === 'en' ? 'Health Tips' : '健康建议'}</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300 flex items-start">
-                </p>
-            </div>
+  // 预约面诊的几个大项
+  const appointmentOptions = [
+    {
+      id: 'psych',
+      icon: BrainCircuit, // 已在文件顶部引入
+      title: isEn ? 'Psychological assessment' : '心理评估',
+      desc: isEn
+        ? 'Support for stress, mood and study-related pressure.'
+        : '针对压力、情绪和学习负担的心理评估与支持。',
+    },
+    {
+      id: 'allergy',
+      icon: AlertTriangle,
+      title: isEn ? 'Allergy testing' : '过敏检测',
+      desc: isEn
+        ? 'Screening for common food and environmental allergies.'
+        : '常见食物与环境过敏原筛查。',
+    },
+    {
+      id: 'checkup',
+      icon: HeartPulse,
+      title: isEn ? 'Physical check-up' : '身体检查',
+      desc: isEn
+        ? 'Basic physical exam and health status review.'
+        : '基础体检与整体健康状况评估。',
+    },
+    {
+      id: 'general',
+      icon: ClipboardList,
+      title: isEn ? 'Comprehensive consult' : '综合问诊',
+      desc: isEn
+        ? 'General medical consultation for complex or unclear symptoms.'
+        : '针对复杂或不明确症状的综合问诊服务。',
+    },
+  ];
+
+  return (
+    <div className="space-y-5">
+      {/* 标题区域 */}
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          {title}
+        </h1>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          {subtitle}
+        </p>
+      </div>
+
+      {/* 一键问诊 */}
+      <QuickActionCard
+        icon={MessageCircle}
+        title={quickConsultTitle}
+        description={quickConsultDesc}
+        buttonText={isEn ? 'Start consult' : '开始问诊'}
+        // 这里的 modal key 你可以在全局 modal 里自己实现，
+        // 暂时写成 oneClickConsult，不会影响其他界面
+        onClick={() => openModal && openModal('oneClickConsult')}
+      />
+
+      {/* 预约面诊几大类 */}
+      <div className="space-y-3">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+          {isEn ? 'Book an appointment' : '预约面诊'}
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {appointmentOptions.map((opt) => (
+            <AppointmentOptionCard
+              key={opt.id}
+              icon={opt.icon}
+              title={opt.title}
+              description={opt.desc}
+              // 这里统一走 appointmentBooking 这个 modal，
+              // 你后面如果想区分，可以在 onClick 里加参数或换成不同 key
+              onClick={() => openModal && openModal('appointmentBooking')}
+            />
+          ))}
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
-// Health Sub-components
-const HealthRecordButton = ({ title, icon: Icon, color, count, onClick }) => (
-    <button 
-        onClick={onClick} 
-        className="p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-sm text-left"
-    >
-        <div className="flex justify-between items-start">
-            <Icon className="w-6 h-6" style={{ color: color }} />
-            {count > 0 && (
-                <span className="text-lg font-bold" style={{ color: color }}>
-                    {count}
-                </span>
-            )}
+/**
+ * 一键问诊卡片
+ */
+const QuickActionCard = ({ icon: Icon, title, description, buttonText, onClick }) => (
+  <div className="p-4 rounded-2xl bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-md">
+    <div className="flex items-start justify-between gap-3">
+      <div className="flex-1">
+        <div className="flex items-center gap-2">
+          <Icon className="w-5 h-5" />
+          <h2 className="text-base font-semibold">{title}</h2>
         </div>
-        <h3 className="text-base font-semibold text-gray-900 dark:text-white mt-3">{title}</h3>
+        <p className="mt-2 text-xs sm:text-sm opacity-90 leading-relaxed">
+          {description}
+        </p>
+      </div>
+    </div>
+    <button
+      type="button"
+      onClick={onClick}
+      className="mt-4 inline-flex items-center px-3 py-1.5 rounded-full bg-white/10 border border-white/30 text-xs font-medium backdrop-blur hover:bg-white/20 transition"
+    >
+      {buttonText}
+      <ChevronRight className="w-4 h-4 ml-1" />
     </button>
+  </div>
 );
 
-const HealthMetricCard = ({ metric }) => (
-    <div className="p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-sm">
-        <div className="flex justify-between items-start">
-            <metric.icon className="w-6 h-6" style={{ color: metric.color }} />
-            <TrendIcon trend={metric.trend} />
-        </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 uppercase mt-3">{metric.title}</p>
-        <p className="text-2xl font-bold text-gray-900 dark:text-white">
-            {metric.value} <span className="text-base font-normal text-gray-500 dark:text-gray-400">{metric.unit}</span>
+/**
+ * 预约选项卡片：心理评估 / 过敏检测 / 身体检查 / 综合问诊
+ */
+const AppointmentOptionCard = ({ icon: Icon, title, description, onClick }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className="w-full text-left p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:border-indigo-400 hover:shadow-md transition"
+  >
+    <div className="flex items-start gap-3">
+      <div className="mt-0.5">
+        <Icon className="w-6 h-6 text-indigo-500" />
+      </div>
+      <div className="flex-1">
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+          {title}
+        </h3>
+        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          {description}
         </p>
-        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mt-2">
-            <div className="h-1.5 rounded-full" style={{ width: `${metric.progress * 100}%`, backgroundColor: metric.color }}></div>
-        </div>
+      </div>
     </div>
+  </button>
 );
 
 
