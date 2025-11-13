@@ -2645,8 +2645,8 @@ const AIAssistant = () => {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
     const [isProcessing, setIsProcessing] = useState(false);
+    const [apiKeyError, setApiKeyError] = useState(false);
     const messagesEndRef = useRef(null);
-    const [useRealAI, setUseRealAI] = useState(true); // 是否使用真实 AI
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -2663,18 +2663,23 @@ const AIAssistant = () => {
         setMessages(prev => [...prev, userMessage]);
         setInput("");
         setIsProcessing(true);
+        setApiKeyError(false);
 
         try {
-            if (useRealAI) {
-                // 使用真实的 Google Gemini AI
-                const apiKey = import.meta.env.VITE_GOOGLE_AI_API_KEY || 'AIzaSyDJfTThmo4jGzffO6dmeF8PhYK3GH690gs';
-                const genAI = new GoogleGenerativeAI(apiKey);
-                const model = genAI.getGenerativeModel({ 
-                    model: "gemini-1.0-pro"
-                });
-                
-                // 构建上下文提示
-                const context = `你是一位专业的大学学业助手，帮助学生管理课程、作业和学习计划。
+            // 使用真实的 Google Gemini AI
+            const apiKey = import.meta.env.VITE_GOOGLE_AI_API_KEY;
+            
+            if (!apiKey || apiKey.startsWith('your_')) {
+                throw new Error('Google AI API Key 未配置。请在 .env 文件中设置 VITE_GOOGLE_AI_API_KEY');
+            }
+            
+            const genAI = new GoogleGenerativeAI(apiKey);
+            const model = genAI.getGenerativeModel({ 
+                model: "gemini-1.5-flash"
+            });
+            
+            // 构建上下文提示
+            const context = `你是一位专业的大学学业助手，帮助学生管理课程、作业和学习计划。
 学生的当前信息：
 - 在读课程：数据科学与统计 (CHME0007)、健康数据科学原理 (CHME0006)、数据方法与健康研究 (CHME0013)
 - 最近作业：CS Assignment (2天后截止)、数据科学论文 (5天后截止)
@@ -2684,26 +2689,23 @@ const AIAssistant = () => {
 
 学生的问题：${prompt}`;
 
-                const result = await model.generateContent(context);
-                const response = await result.response;
-                const aiText = response.text();
-                
-                const aiMessage = { id: Date.now() + 1, text: aiText, isUser: false };
-                setMessages(prev => [...prev, aiMessage]);
-            } else {
-                // 使用 demo 数据
-                setTimeout(() => {
-                    const aiResponse = demoConversations[prompt] || demoConversations["default"];
-                    const aiMessage = { id: Date.now() + 1, text: aiResponse, isUser: false };
-                    setMessages(prev => [...prev, aiMessage]);
-                }, 1000);
-            }
+            const result = await model.generateContent(context);
+            const response = await result.response;
+            const aiText = response.text();
+            
+            const aiMessage = { id: Date.now() + 1, text: aiText, isUser: false };
+            setMessages(prev => [...prev, aiMessage]);
         } catch (error) {
             console.error('AI 调用失败:', error);
-            // 如果 AI 调用失败，回退到 demo 数据
-            const aiResponse = demoConversations[prompt] || demoConversations["default"];
-            const aiMessage = { id: Date.now() + 1, text: aiResponse, isUser: false };
-            setMessages(prev => [...prev, aiMessage]);
+            setApiKeyError(true);
+            
+            const errorMessage = {
+                id: Date.now() + 1,
+                text: `❌ API 调用失败：${error.message}\n\n**解决方案：**\n1. 确保你有有效的 Google AI API Key\n2. 在项目根目录的 \`.env\` 文件中设置：\n   \`VITE_GOOGLE_AI_API_KEY=your_actual_api_key\`\n3. 重新启动开发服务器（npm run dev）\n\n如需获取 API Key，请访问 [Google AI Studio](https://aistudio.google.com/app/apikey)`,
+                isUser: false,
+                isError: true
+            };
+            setMessages(prev => [...prev, errorMessage]);
         } finally {
             setIsProcessing(false);
         }
@@ -2718,6 +2720,14 @@ const AIAssistant = () => {
     return (
         <div className="flex flex-col h-full">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white px-4 pt-4">AI 助手</h1>
+            
+            {apiKeyError && (
+                <div className="mx-4 mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                    <p className="text-sm text-red-700 dark:text-red-300">
+                        ⚠️ <strong>API 配置问题：</strong> 请检查 .env 文件中的 VITE_GOOGLE_AI_API_KEY 是否有效
+                    </p>
+                </div>
+            )}
             
             <div className="flex-1 overflow-y-auto space-y-4 p-4">
                 {messages.length === 0 && (
@@ -2745,7 +2755,13 @@ const AIAssistant = () => {
                 
                 {messages.map(msg => (
                     <div key={msg.id} className={`flex ${msg.isUser ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-xs lg:max-w-md p-3 rounded-2xl ${msg.isUser ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm'}`}>
+                        <div className={`max-w-xs lg:max-w-md p-3 rounded-2xl ${
+                            msg.isUser 
+                                ? 'bg-indigo-600 text-white' 
+                                : msg.isError
+                                ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800'
+                                : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm'
+                        }`}>
                             <ReactMarkdown 
                                 className="text-sm prose prose-sm dark:prose-invert max-w-none"
                                 components={{
@@ -2761,6 +2777,7 @@ const AIAssistant = () => {
                                     table: ({node, ...props}) => <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-600 my-2" {...props} />,
                                     th: ({node, ...props}) => <th className="px-3 py-1 text-left text-xs font-medium uppercase" {...props} />,
                                     td: ({node, ...props}) => <td className="px-3 py-1 text-sm" {...props} />,
+                                    a: ({node, ...props}) => <a className="text-blue-600 dark:text-blue-400 underline" {...props} />,
                                 }}
                             >
                                 {msg.text}
