@@ -538,7 +538,7 @@ const PriorityChip = ({ priority, isSelected, onClick }) => {
 /**
  * Add Schedule Modal - 添加课程/日程
  */
-const AddScheduleModal = () => {
+const AddScheduleModal = ({ t }) => {
     const { closeModal } = useApp();
     const { addSchedule } = useSchedule();
     const { language } = useTranslation();
@@ -546,7 +546,7 @@ const AddScheduleModal = () => {
     
     const [courseName, setCourseName] = useState("");
     const [courseCode, setCourseCode] = useState("");
-    const [type, setType] = useState(isEn ? "Course" : "课程");
+    const [type, setType] = useState(t ? t('student.course') : "课程");
     const [lecturer, setLecturer] = useState("");
     const [location, setLocation] = useState("");
     const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
@@ -555,15 +555,21 @@ const AddScheduleModal = () => {
     const [repeatRule, setRepeatRule] = useState("none");
     const [repeatUntil, setRepeatUntil] = useState(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10));
     
-    const types = isEn ? ["Course", "Meeting", "Lab", "Seminar", "Other"] : ["课程", "会议", "实验", "研讨", "其他"];
-    const repeatRules = isEn 
-        ? ["None", "Daily", "Weekly", "Biweekly", "Monthly"]
+    const types = t ? [
+        t('student.course'), 
+        t('student.meeting'), 
+        t('student.lab'), 
+        t('student.seminar'), 
+        t('student.other')
+    ] : ["课程", "会议", "实验", "研讨", "其他"];
+    const repeatRules = t 
+        ? [t('student.none'), t('student.daily'), t('student.weekly'), t('student.biweekly'), t('student.monthly')]
         : ["无", "每天", "每周", "每两周", "每月"];
     const repeatRuleValues = ["none", "daily", "weekly", "biweekly", "monthly"];
     
     const handleSubmit = () => {
         if (!courseName || !startTime || !date) {
-            alert(isEn ? "Please fill in required fields" : "请填写必填项");
+            alert(t ? t('student.pleaseFillRequiredFields') : "请填写必填项");
             return;
         }
         
@@ -585,31 +591,31 @@ const AddScheduleModal = () => {
         
         addSchedule(newSchedule);
         closeModal();
-        alert(isEn ? "Schedule added successfully!" : "日程添加成功！");
+        alert(t ? t('student.scheduleAddedSuccessfully') : "日程添加成功！");
     };
     
     return (
         <div className="p-4 space-y-6">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {isEn ? 'Add Schedule' : '添加日程'}
+                {t ? t('student.addSchedule') : '添加日程'}
             </h2>
             
             {/* 基本信息 */}
             <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
                 <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
-                    {isEn ? 'Basic Information' : '基本信息'}
+                    {t ? t('student.basicInformation') : '基本信息'}
                 </h3>
                 
                 {/* 课程名称 */}
                 <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {isEn ? 'Course Name' : '课程名称'} <span className="text-red-500">*</span>
+                        {t ? t('student.courseName') : '课程名称'} <span className="text-red-500">*</span>
                     </label>
                     <input
                         type="text"
                         value={courseName}
                         onChange={(e) => setCourseName(e.target.value)}
-                        placeholder={isEn ? "Enter course name" : "输入课程名称"}
+                        placeholder={t ? t('student.courseName').toLowerCase() : "输入课程名称"}
                         className="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500"
                     />
                 </div>
@@ -618,13 +624,13 @@ const AddScheduleModal = () => {
                 <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                            {isEn ? 'Course Code' : '课程代码'}
+                            {t ? t('student.courseCode') : '课程代码'}
                         </label>
                         <input
                             type="text"
                             value={courseCode}
                             onChange={(e) => setCourseCode(e.target.value)}
-                            placeholder={isEn ? "e.g., CS101" : "例如: CS101"}
+                            placeholder={t ? "e.g., CS101" : "例如: CS101"}
                             className="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500"
                         />
                     </div>
@@ -632,14 +638,14 @@ const AddScheduleModal = () => {
                     {/* 类型 */}
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                            {isEn ? 'Type' : '类型'}
+                            {t ? t('student.type') : '类型'}
                         </label>
                         <select
                             value={type}
                             onChange={(e) => setType(e.target.value)}
                             className="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white"
                         >
-                            {types.map(t => <option key={t} value={t}>{t}</option>)}
+                            {types.map(typeOption => <option key={typeOption} value={typeOption}>{typeOption}</option>)}
                         </select>
                     </div>
                 </div>
@@ -648,26 +654,26 @@ const AddScheduleModal = () => {
                 <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                            {isEn ? 'Lecturer' : '讲师'}
+                            {t ? t('student.lecturer') : '讲师'}
                         </label>
                         <input
                             type="text"
                             value={lecturer}
                             onChange={(e) => setLecturer(e.target.value)}
-                            placeholder={isEn ? "Enter lecturer name" : "输入讲师名称"}
+                            placeholder={t ? "Enter lecturer name" : "输入讲师名称"}
                             className="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500"
                         />
                     </div>
                     
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                            {isEn ? 'Location' : '地点'}
+                            {t ? t('student.location') : '地点'}
                         </label>
                         <input
                             type="text"
                             value={location}
                             onChange={(e) => setLocation(e.target.value)}
-                            placeholder={isEn ? "e.g., Room 101" : "例如: 101教室"}
+                            placeholder={t ? "e.g., Room 101" : "例如: 101教室"}
                             className="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500"
                         />
                     </div>
@@ -677,14 +683,14 @@ const AddScheduleModal = () => {
             {/* 时间信息 */}
             <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
                 <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
-                    {isEn ? 'Time Information' : '时间信息'}
+                    {t ? t('student.timeInformation') : '时间信息'}
                 </h3>
                 
                 {/* 日期和开始时间 */}
                 <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                            {isEn ? 'Date' : '日期'} <span className="text-red-500">*</span>
+                            {t ? t('student.date') : '日期'} <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="date"
@@ -696,7 +702,7 @@ const AddScheduleModal = () => {
                     
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                            {isEn ? 'Start Time' : '开始时间'} <span className="text-red-500">*</span>
+                            {t ? t('student.startTime') : '开始时间'} <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="time"
@@ -710,7 +716,7 @@ const AddScheduleModal = () => {
                 {/* 时长 */}
                 <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {isEn ? 'Duration (hours)' : '时长(小时)'}
+                        {t ? t('student.duration') : '时长(小时)'}
                     </label>
                     <div className="flex items-center space-x-2">
                         <input
@@ -727,7 +733,7 @@ const AddScheduleModal = () => {
                         </div>
                     </div>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {isEn ? `End time: ${new Date(new Date(`${date}T${startTime}`).getTime() + duration * 60 * 60 * 1000).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'})}` : `结束时间: ${new Date(new Date(`${date}T${startTime}`).getTime() + duration * 60 * 60 * 1000).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'})}`}
+                        {t ? `${t('student.endTime')}: ${new Date(new Date(`${date}T${startTime}`).getTime() + duration * 60 * 60 * 1000).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'})}` : `结束时间: ${new Date(new Date(`${date}T${startTime}`).getTime() + duration * 60 * 60 * 1000).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'})}`}
                     </p>
                 </div>
             </div>
@@ -735,13 +741,13 @@ const AddScheduleModal = () => {
             {/* 重复设置 */}
             <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
                 <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
-                    {isEn ? 'Repeat Settings' : '重复设置'}
+                    {t ? t('student.repeatSettings') : '重复设置'}
                 </h3>
                 
                 {/* 重复规则 */}
                 <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {isEn ? 'Repeat Rule' : '重复规则'}
+                        {t ? t('student.repeatRule') : '重复规则'}
                     </label>
                     <select
                         value={repeatRule}
@@ -760,7 +766,7 @@ const AddScheduleModal = () => {
                 {repeatRule !== "none" && (
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                            {isEn ? 'Repeat Until' : '重复截止日期'}
+                            {t ? t('student.repeatUntil') : '重复截止日期'}
                         </label>
                         <input
                             type="date"
@@ -778,13 +784,13 @@ const AddScheduleModal = () => {
                     onClick={closeModal}
                     className="flex-1 py-3 px-4 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600"
                 >
-                    {isEn ? 'Cancel' : '取消'}
+                    {t ? t('student.cancel') : '取消'}
                 </button>
                 <button
                     onClick={handleSubmit}
                     className="flex-1 py-3 px-4 bg-violet-600 text-white rounded-lg font-medium hover:bg-violet-700"
                 >
-                    {isEn ? 'Add Schedule' : '添加日程'}
+                    {t ? t('student.addSchedule') : '添加日程'}
                 </button>
             </div>
         </div>
@@ -1717,14 +1723,14 @@ const ModuleDetailModal = ({ moduleId }) => {
             
             <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
                 <div className="flex justify-between items-center">
-                    <span className="text-lg font-medium text-gray-800 dark:text-gray-200">{language === 'en' ? 'Total Score' : '总成绩'}</span>
+                    <span className="text-lg font-medium text-gray-800 dark:text-gray-200">{t ? t('student.totalScore') : '总成绩'}</span>
                     <span className={`text-4xl font-bold ${markColor(module.mark)}`}>{module.mark > 0 ? module.mark : 'N/A'}</span>
                 </div>
             </div>
 
             {module.gradeBreakdown.length > 0 && (
                 <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow space-y-3">
-                    <h3 className="font-semibold text-gray-900 dark:text-white">{language === 'en' ? 'Grade Breakdown' : '成绩构成'}</h3>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{t ? t('student.gradeBreakdown') : '成绩构成'}</h3>
                     {module.gradeBreakdown.map(item => (
                         <div key={item.component}>
                             <div className="flex justify-between text-sm text-gray-600 dark:text-gray-300 mb-1">
@@ -1741,7 +1747,7 @@ const ModuleDetailModal = ({ moduleId }) => {
 
             {module.assignmentList.length > 0 && (
                 <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow space-y-3">
-                    <h3 className="font-semibold text-gray-900 dark:text-white">{language === 'en' ? 'Assignment List' : '作业列表'}</h3>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{t ? t('student.assignmentList') : '作业列表'}</h3>
                     {module.assignmentList.map(item => (
                         <div key={item.id} className="flex justify-between items-center text-sm">
                             <div className="flex items-center">
@@ -1775,7 +1781,7 @@ const Dashboard = ({ t }) => {
             {/* Header */}
             <div>
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t ? t('student.welcome') : '欢迎'}, Zoya</h1>
-                <p className="text-base text-gray-600 dark:text-gray-400">MSc Health Data Science · Year 1</p>
+                <p className="text-base text-gray-600 dark:text-gray-400">{t ? `${t('student.mscHealthDataScience')} · ${t('student.year1')}` : '健康数据科学硕士 · 一年级'}</p>
             </div>
 
             {/* Stats Row */}
@@ -1796,7 +1802,7 @@ const Dashboard = ({ t }) => {
                         {mockTodayClasses.map(item => <TodayClassCard key={item.id} item={item} />)}
                     </div>
                 ) : (
-                    <EmptyStateCard icon={Check} message={t ? "No classes today" : "今天没有课程，好好利用这段时间！"} />
+                    <EmptyStateCard icon={Check} message={t ? t('student.noClassesToday') : "今天没有课程，好好利用这段时间！"} />
                 )}
             </div>
             
@@ -2445,28 +2451,24 @@ const Health = ({ t }) => {
             {/* 标题 */}
             <div className="space-y-1">
                 <p className="text-xs uppercase tracking-widest text-indigo-500 font-semibold">
-                    {isEn ? "Health" : "健康"}
+                    {t ? t('student.health') : "健康"}
                 </p>
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                    {isEn ? "Campus Health Services" : "校园健康服务"}
+                    {t ? t('student.campusHealthServices') : "校园健康服务"}
                 </h1>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {isEn
-                        ? "One-tap consult, on-campus appointments, and your health reports in one place."
-                        : "一键问诊、预约面诊和个人健康报告，都在这里统一管理。"}
+                    {t ? "One-tap consult, on-campus appointments, and your health reports in one place." : "一键问诊、预约面诊和个人健康报告，都在这里统一管理。"}
                 </p>
             </div>
 
             {/* 一键问诊 */}
             <QuickActionCard
                 icon={PhoneCall}
-                title={isEn ? "One-tap consult" : "一键问诊"}
+                title={t ? t('student.oneTapConsult') : "一键问诊"}
                 description={
-                    isEn
-                        ? "Students can contact our remote medical team at any time. After submitting symptoms, a doctor will reply within 15 minutes via text / phone / video."
-                        : "学生可以随时发起远程医疗咨询。提交症状后，医生团队会在 15 分钟内通过文字 / 电话 / 视频进行回复。"
+                    t ? "Students can contact our remote medical team at any time. After submitting symptoms, a doctor will reply within 15 minutes via text / phone / video." : "学生可以随时发起远程医疗咨询。提交症状后，医生团队会在 15 分钟内通过文字 / 电话 / 视频进行回复。"
                 }
-                buttonText={isEn ? "Contact remote doctor" : "联系远程医生"}
+                buttonText={t ? t('student.contactRemoteDoctor') : "联系远程医生"}
                 onClick={() => openModal("appointmentBooking")}
             />
 
@@ -2474,60 +2476,50 @@ const Health = ({ t }) => {
             <div className="space-y-3">
                 <div className="flex items-center justify-between">
                     <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {isEn ? "Book on-site visit" : "预约面诊"}
+                        {t ? t('student.bookOnSiteVisit') : "预约面诊"}
                     </h2>
                     <button
                         type="button"
                         className="text-xs font-medium text-indigo-600 hover:text-indigo-500"
                         onClick={() => openModal("appointmentBooking")}
                     >
-                        {isEn ? "Book now" : "立即预约"}
+                        {t ? t('student.bookNow') : "立即预约"}
                     </button>
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {isEn
-                        ? "Select from major services below. You'll be matched with the right doctor team."
-                        : "按需选择以下大项服务，我们会为你匹配合适的校医院 / 专家团队。"}
+                    {t ? "Select from major services below. You'll be matched with the right doctor team." : "按需选择以下大项服务，我们会为你匹配合适的校医院 / 专家团队。"}
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <AppointmentOptionCard
                         icon={Brain}
-                        title={isEn ? "Psychological assessment" : "心理评估"}
+                        title={t ? t('student.psychologicalAssessment') : "心理评估"}
                         description={
-                            isEn
-                                ? "Emotional support, stress management and basic mental health screening."
-                                : "情绪支持、压力管理与基础心理健康评估。"
+                            t ? "Emotional support, stress management and basic mental health screening." : "情绪支持、压力管理与基础心理健康评估。"
                         }
                         onClick={() => openModal("appointmentBooking")}
                     />
                     <AppointmentOptionCard
                         icon={Sparkles}
-                        title={isEn ? "Allergy testing" : "过敏检测"}
+                        title={t ? t('student.allergyTesting') : "过敏检测"}
                         description={
-                            isEn
-                                ? "Food / respiratory allergy screening with doctor explanation."
-                                : "呼吸道 / 食物过敏筛查，并提供医学解释。"
+                            t ? "Food / respiratory allergy screening with doctor explanation." : "呼吸道 / 食物过敏筛查，并提供医学解释。"
                         }
                         onClick={() => openModal("allergies")}
                     />
                     <AppointmentOptionCard
                         icon={Stethoscope}
-                        title={isEn ? "Physical check-up" : "身体检查"}
+                        title={t ? t('student.physicalCheckUp') : "身体检查"}
                         description={
-                            isEn
-                                ? "Basic physical exam and sports-safety check for students."
-                                : "基础体检 + 运动安全评估，适合长期伏案或运动量大的学生。"
+                            t ? "Basic physical exam and sports-safety check for students." : "基础体检 + 运动安全评估，适合长期伏案或运动量大的学生。"
                         }
                         onClick={() => openModal("appointmentBooking")}
                     />
                     <AppointmentOptionCard
                         icon={MedicalClipboard}
-                        title={isEn ? "General consultation" : "综合问诊"}
+                        title={t ? t('student.generalConsultation') : "综合问诊"}
                         description={
-                            isEn
-                                ? "Multi-disciplinary consultation for complex or long-term conditions."
-                                : "多学科联合评估，适合症状复杂或长期反复的情况。"
+                            t ? "Multi-disciplinary consultation for complex or long-term conditions." : "多学科联合评估，适合症状复杂或长期反复的情况。"
                         }
                         onClick={() => openModal("appointmentBooking")}
                     />
@@ -2537,22 +2529,20 @@ const Health = ({ t }) => {
             {/* 我的报告 */}
             <div className="space-y-3">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    {isEn ? "My reports" : "我的报告"}
+                    {t ? t('student.myReports') : "我的报告"}
                 </h2>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {isEn
-                        ? "View your visit history and prescriptions. Future lab / imaging reports can also be linked here."
-                        : "查看就诊记录和处方记录，之后也可以接入体检报告、影像报告等。"}
+                    {t ? "View your visit history and prescriptions. Future lab / imaging reports can also be linked here." : "查看就诊记录和处方记录，之后也可以接入体检报告、影像报告等。"}
                 </p>
 
                 <div className="grid grid-cols-2 gap-3">
                     <ReportCard
-                        title={isEn ? "Visit history" : "就诊历史"}
+                        title={t ? t('student.visitHistory') : "就诊历史"}
                         count={mockHealthData.medicalRecords.length}
                         onClick={() => openModal("medicalRecords")}
                     />
                     <ReportCard
-                        title={isEn ? "Prescriptions" : "处方记录"}
+                        title={t ? t('student.prescriptions') : "处方记录"}
                         count={mockHealthData.prescriptions.length}
                         onClick={() => openModal("prescriptions")}
                     />
@@ -2893,7 +2883,7 @@ const ActivitiesPage = ({ t }) => {
                     <div className="w-20 h-20 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center mb-4">
                         <span className="text-3xl">✨</span>
                     </div>
-                    <p className="text-gray-600 dark:text-gray-300 font-medium">{language === 'en' ? 'No events of this type' : '暂无该类型的活动'}</p>
+                    <p className="text-gray-600 dark:text-gray-300 font-medium">{t ? t('student.noEventsOfThisType') : '暂无该类型的活动'}</p>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{language === 'en' ? 'Check back later' : '稍后再来看看吧'}</p>
                 </div>
             ) : (
@@ -3250,7 +3240,7 @@ function MainApp({ onLogout }) {
         let content;
         switch (activeModal.type) {
             case 'addSchedule':
-                content = <AddScheduleModal />;
+                content = <AddScheduleModal t={t} />;
                 break;
             case 'addTodo':
                 content = <AddTodoModal />;
