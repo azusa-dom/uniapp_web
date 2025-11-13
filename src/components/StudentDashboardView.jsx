@@ -1265,24 +1265,26 @@ const AddAllergyForm = ({ onClose }) => {
  * Email Detail Modal (from StudentEmailView.swift)
  */
 const EmailDetailModal = ({ emailId }) => {
+    const { language } = useTranslation();
     const email = mockEmails.find(e => e.id === emailId);
+    const translatedEmail = email ? getTranslatedEmail(email, language) : null;
     const detail = mockEmailDetails[email?.sender] || { original: email?.excerpt, aiTranslation: email?.excerpt, aiSummary: [] };
     const [showTranslation, setShowTranslation] = useState(false);
     const [showSummary, setShowSummary] = useState(false);
 
-    if (!email) return <div className="p-4 text-gray-900 dark:text-white">邮件未找到</div>;
+    if (!email) return <div className="p-4 text-gray-900 dark:text-white">{language === 'en' ? 'Email not found' : '邮件未找到'}</div>;
 
     return (
         <div className="p-4 space-y-4">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">{email.title}</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">{translatedEmail.title}</h2>
             <div className="pb-3 border-b border-gray-200 dark:border-gray-700">
-                <p className="text-sm font-medium text-gray-800 dark:text-gray-200">发件人: {email.sender}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">时间: {email.date}</p>
+                <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{language === 'en' ? 'From' : '发件人'}: {translatedEmail.sender}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{language === 'en' ? 'Time' : '时间'}: {email.date}</p>
             </div>
             
             {/* Original Content */}
             <div className="space-y-2">
-                <h3 className="font-semibold text-gray-800 dark:text-gray-200">邮件内容</h3>
+                <h3 className="font-semibold text-gray-800 dark:text-gray-200">{language === 'en' ? 'Email Content' : '邮件内容'}</h3>
                 <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{detail.original}</p>
             </div>
 
@@ -1292,26 +1294,26 @@ const EmailDetailModal = ({ emailId }) => {
                     onClick={() => setShowTranslation(!showTranslation)}
                     className={`flex-1 py-3 px-4 rounded-lg font-medium text-white ${showTranslation ? 'bg-green-600' : 'bg-indigo-600'}`}
                 >
-                    {showTranslation ? '已翻译' : 'AI 翻译'}
+                    {showTranslation ? (language === 'en' ? 'Translated' : '已翻译') : (language === 'en' ? 'AI Translate' : 'AI 翻译')}
                 </button>
                 <button
                     onClick={() => setShowSummary(!showSummary)}
                     className={`flex-1 py-3 px-4 rounded-lg font-medium text-white ${showSummary ? 'bg-green-600' : 'bg-indigo-600'}`}
                 >
-                    {showSummary ? '已总结' : 'AI 总结'}
+                    {showSummary ? (language === 'en' ? 'Summarized' : '已总结') : (language === 'en' ? 'AI Summary' : 'AI 总结')}
                 </button>
             </div>
 
             {/* AI Content */}
             {showTranslation && (
                 <div className="p-3 bg-blue-50 dark:bg-blue-900/50 border border-blue-200 dark:border-blue-700 rounded-lg">
-                    <h3 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">AI 翻译</h3>
+                    <h3 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">{language === 'en' ? 'AI Translation' : 'AI 翻译'}</h3>
                     <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{detail.aiTranslation}</p>
                 </div>
             )}
             {showSummary && detail.aiSummary.length > 0 && (
                 <div className="p-3 bg-purple-50 dark:bg-purple-900/50 border border-purple-200 dark:border-purple-700 rounded-lg">
-                    <h3 className="font-semibold text-purple-800 dark:text-purple-200 mb-2">AI 总结</h3>
+                    <h3 className="font-semibold text-purple-800 dark:text-purple-200 mb-2">{language === 'en' ? 'AI Summary' : 'AI 总结'}</h3>
                     <ul className="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
                         {detail.aiSummary.map((item, i) => <li key={i}>{item}</li>)}
                     </ul>
@@ -2050,25 +2052,33 @@ const ModernEventCard = ({ event }) => (
 /**
  * Page: Health (from StudentHealthView.swift)
  */
-const Health = () => {
+const Health = ({ t }) => {
     const { openModal } = useApp();
+    const { language } = useTranslation();
     const [range, setRange] = useState("day");
     const tabs = [
-        { id: "day", label: "今日" },
-        { id: "week", label: "7天" },
+        { id: "day", label: language === 'en' ? "Today" : "今日" },
+        { id: "week", label: language === 'en' ? "7 Days" : "7天" },
     ];
     const metrics = mockHealthMetrics[range];
 
+    const healthRecordTitles = {
+        medicalRecords: language === 'en' ? "Medical Records" : "就诊历史",
+        prescriptions: language === 'en' ? "Prescriptions" : "处方记录",
+        appointment: language === 'en' ? "Book Appointment" : "预约面诊",
+        allergies: language === 'en' ? "Allergies" : "过敏史"
+    };
+
     return (
         <div className="space-y-5">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">健康</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{language === 'en' ? 'Health' : '健康'}</h1>
             
             {/* Health Records */}
             <div className="grid grid-cols-2 gap-3">
-                <HealthRecordButton title="就诊历史" icon={ClipboardList} color="#6366F1" count={mockMedicalRecords.length} onClick={() => openModal('medicalRecords')} />
-                <HealthRecordButton title="处方记录" icon={Pill} color="#EF4444" count={mockPrescriptions.filter(p => p.status === 'active').length} onClick={() => openModal('prescriptions')} />
-                <HealthRecordButton title="预约面诊" icon={CalendarPlus} color="#10B981" count={0} onClick={() => openModal('appointmentBooking')} />
-                <HealthRecordButton title="过敏史" icon={AlertTriangle} color="#F59E0B" count={allergies.length} onClick={() => openModal('allergies')} />
+                <HealthRecordButton title={healthRecordTitles.medicalRecords} icon={ClipboardList} color="#6366F1" count={mockMedicalRecords.length} onClick={() => openModal('medicalRecords')} />
+                <HealthRecordButton title={healthRecordTitles.prescriptions} icon={Pill} color="#EF4444" count={mockPrescriptions.filter(p => p.status === 'active').length} onClick={() => openModal('prescriptions')} />
+                <HealthRecordButton title={healthRecordTitles.appointment} icon={CalendarPlus} color="#10B981" count={0} onClick={() => openModal('appointmentBooking')} />
+                <HealthRecordButton title={healthRecordTitles.allergies} icon={AlertTriangle} color="#F59E0B" count={allergies.length} onClick={() => openModal('allergies')} />
             </div>
 
             <SegmentedControl tabs={tabs} selected={range} setSelected={setRange} />
@@ -2082,7 +2092,7 @@ const Health = () => {
             
             {/* Tips Section */}
             <div className="p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-sm space-y-3">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">健康建议</h3>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">{language === 'en' ? 'Health Tips' : '健康建议'}</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-300 flex items-start">
                 </p>
             </div>
@@ -2293,10 +2303,25 @@ const AIAssistant = () => {
 /**
  * Page: Activities (from iOS ActivitiesView)
  */
-const ActivitiesPage = () => {
+const ActivitiesPage = ({ t }) => {
+    const { language } = useTranslation();
     const [selectedType, setSelectedType] = useState('全部');
     
     const activityTypes = ['全部', '学术竞赛', '学术讲座', '社团活动', '志愿服务', '文化活动', '职业发展', '体育赛事', '学术研讨', '健康活动', '节日活动'];
+    
+    const activityTypeTranslations = {
+        '全部': language === 'en' ? 'All' : '全部',
+        '学术竞赛': language === 'en' ? 'Academic Competitions' : '学术竞赛',
+        '学术讲座': language === 'en' ? 'Academic Lectures' : '学术讲座',
+        '社团活动': language === 'en' ? 'Club Activities' : '社团活动',
+        '志愿服务': language === 'en' ? 'Volunteer Service' : '志愿服务',
+        '文化活动': language === 'en' ? 'Cultural Events' : '文化活动',
+        '职业发展': language === 'en' ? 'Career Development' : '职业发展',
+        '体育赛事': language === 'en' ? 'Sports Events' : '体育赛事',
+        '学术研讨': language === 'en' ? 'Academic Seminars' : '学术研讨',
+        '健康活动': language === 'en' ? 'Health Activities' : '健康活动',
+        '节日活动': language === 'en' ? 'Festival Events' : '节日活动'
+    };
     
     const getTypeColor = (type) => {
         const colorMap = {
@@ -2320,8 +2345,8 @@ const ActivitiesPage = () => {
 
     return (
         <div className="space-y-5">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">🎯 校园活动</h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400 -mt-3">发现精彩的UCL校园活动</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{language === 'en' ? '🎯 Campus Events' : '🎯 校园活动'}</h1>
+            <p className="text-sm text-gray-600 dark:text-gray-400 -mt-3">{language === 'en' ? 'Discover exciting UCL campus events' : '发现精彩的UCL校园活动'}</p>
             
             {/* Filter Pills */}
             <div className="overflow-x-auto -mx-4 px-4">
@@ -2336,7 +2361,7 @@ const ActivitiesPage = () => {
                                     : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:shadow-sm'
                             }`}
                         >
-                            {type}
+                            {activityTypeTranslations[type]}
                         </button>
                     ))}
                 </div>
@@ -2348,13 +2373,13 @@ const ActivitiesPage = () => {
                     <div className="w-20 h-20 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center mb-4">
                         <span className="text-3xl">✨</span>
                     </div>
-                    <p className="text-gray-600 dark:text-gray-300 font-medium">暂无该类型的活动</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">稍后再来看看吧</p>
+                    <p className="text-gray-600 dark:text-gray-300 font-medium">{language === 'en' ? 'No events of this type' : '暂无该类型的活动'}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{language === 'en' ? 'Check back later' : '稍后再来看看吧'}</p>
                 </div>
             ) : (
                 <div className="space-y-3">
                     {filteredActivities.map(activity => (
-                        <ActivityCard key={activity.id} activity={activity} getTypeColor={getTypeColor} />
+                        <ActivityCard key={activity.id} activity={activity} getTypeColor={getTypeColor} language={language} />
                     ))}
                 </div>
             )}
@@ -2363,7 +2388,8 @@ const ActivitiesPage = () => {
 };
 
 // Activity Card Component
-const ActivityCard = ({ activity, getTypeColor }) => {
+const ActivityCard = ({ activity, getTypeColor, language = 'zh' }) => {
+    const translatedActivity = getTranslatedActivity(activity, language);
     const IconComponent = activity.icon;
     const typeColor = getTypeColor(activity.type);
     
@@ -2385,7 +2411,7 @@ const ActivityCard = ({ activity, getTypeColor }) => {
                 <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-3 mb-2">
                         <h3 className="text-base font-semibold text-gray-900 dark:text-white line-clamp-2">
-                            {activity.title}
+                            {translatedActivity.title}
                         </h3>
                         <div 
                             className="flex items-center justify-center w-10 h-10 rounded-full flex-shrink-0"
@@ -2402,16 +2428,16 @@ const ActivityCard = ({ activity, getTypeColor }) => {
                             backgroundColor: `${typeColor}15`
                         }}
                     >
-                        {activity.type}
+                        {translatedActivity.type}
                     </span>
 
                     <div className="space-y-2">
                         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                             <MapPin className="w-4 h-4 flex-shrink-0" style={{ color: typeColor }} />
-                            <span className="line-clamp-1">{activity.location}</span>
+                            <span className="line-clamp-1">{translatedActivity.location}</span>
                         </div>
                         <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
-                            {activity.description}
+                            {translatedActivity.description}
                         </p>
                     </div>
                 </div>
@@ -2426,10 +2452,18 @@ const ActivityCard = ({ activity, getTypeColor }) => {
 /**
  * Page: Email (from StudentEmailView.swift)
  */
-const Email = () => {
+const Email = ({ t }) => {
     const { openModal } = useApp();
+    const { language } = useTranslation();
     const [filter, setFilter] = useState("全部");
     const categories = ["全部", "紧急", "学术", "活动"];
+    
+    const categoryTranslations = {
+        "全部": language === 'en' ? "All" : "全部",
+        "紧急": language === 'en' ? "Urgent" : "紧急",
+        "学术": language === 'en' ? "Academic" : "学术",
+        "活动": language === 'en' ? "Events" : "活动"
+    };
     
     const filteredEmails = mockEmails.filter(e => {
         if (filter === "全部") return true;
@@ -2441,17 +2475,17 @@ const Email = () => {
 
     return (
         <div className="space-y-5">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">邮件</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{language === 'en' ? 'Email' : '邮件'}</h1>
             
             {/* Stats */}
             <div className="p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-sm flex justify-around">
                 <div className="text-center">
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">{mockEmails.length}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">总邮件</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{language === 'en' ? 'Total Emails' : '总邮件'}</p>
                 </div>
                 <div className="text-center">
                     <p className="text-2xl font-bold text-red-500">{mockEmails.filter(e => !e.isRead).length}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">未读</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{language === 'en' ? 'Unread' : '未读'}</p>
                 </div>
             </div>
             
@@ -2467,7 +2501,7 @@ const Email = () => {
                                 : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200'}
                         `}
                     >
-                        {cat}
+                        {categoryTranslations[cat]}
                     </button>
                 ))}
             </div>
@@ -2475,7 +2509,7 @@ const Email = () => {
             {/* Email List */}
             <div className="space-y-3">
                 {filteredEmails.map(email => (
-                    <EmailRow key={email.id} email={email} onClick={() => openModal('emailDetail', email.id)} />
+                    <EmailRow key={email.id} email={email} onClick={() => openModal('emailDetail', email.id)} language={language} />
                 ))}
             </div>
         </div>
@@ -2483,7 +2517,8 @@ const Email = () => {
 };
 
 // Email Sub-components
-const EmailRow = ({ email, onClick }) => {
+const EmailRow = ({ email, onClick, language = 'zh' }) => {
+    const translatedEmail = getTranslatedEmail(email, language);
     const categoryStyles = {
         Urgent: { icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-100 dark:bg-red-900/50' },
         Academic: { icon: BookOpen, color: 'text-indigo-500', bg: 'bg-indigo-100 dark:bg-indigo-900/50' },
@@ -2501,11 +2536,11 @@ const EmailRow = ({ email, onClick }) => {
             </div>
             <div className="flex-1 overflow-hidden">
                 <div className="flex justify-between items-start">
-                    <h3 className={`font-semibold truncate ${email.isRead ? 'text-gray-700 dark:text-gray-300' : 'text-gray-900 dark:text-white'}`}>{email.title}</h3>
+                    <h3 className={`font-semibold truncate ${email.isRead ? 'text-gray-700 dark:text-gray-300' : 'text-gray-900 dark:text-white'}`}>{translatedEmail.title}</h3>
                     <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap ml-2">{email.date}</span>
                 </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{email.sender}</p>
-                <p className="text-sm text-gray-600 dark:text-gray-300 truncate mt-1">{email.excerpt}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{translatedEmail.sender}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300 truncate mt-1">{translatedEmail.excerpt}</p>
             </div>
         </button>
     );
