@@ -3277,8 +3277,15 @@ function MainApp({ onLogout }) {
 
     return (
         <div className="h-screen w-full flex flex-col font-sans bg-gradient-to-br from-gray-50 to-indigo-50 dark:from-gray-900 dark:to-indigo-900/50 text-gray-900 dark:text-white">
-            {/* 顶部导航 */}
-            <TopNav
+            {/* 主内容区域 */}
+            <main
+                className={`flex-1 overflow-y-auto ${selectedTab === "ai" ? "p-0" : "p-4"} pb-20`}
+            >
+                {renderPage()}
+            </main>
+
+            {/* 底部导航 */}
+            <BottomNav
                 selectedTab={selectedTab}
                 setSelectedTab={setSelectedTab}
                 t={t}
@@ -3286,22 +3293,15 @@ function MainApp({ onLogout }) {
                 setLanguage={setLanguage}
             />
 
-            {/* 主内容区域 */}
-            <main
-                className={`flex-1 overflow-y-auto ${selectedTab === "ai" ? "p-0" : "p-4"}`}
-            >
-                {renderPage()}
-            </main>
-
             {/* 弹窗渲染 */}
             {activeModal && renderModal()}
         </div>
     );
 }
 
-// --- Top Navigation Component (顶部导航) ---
+// --- Bottom Navigation Component (底部导航) ---
 
-const TopNav = ({ selectedTab, setSelectedTab, t, language, setLanguage }) => {
+const BottomNav = ({ selectedTab, setSelectedTab, t, language, setLanguage }) => {
     const navItems = [
         { id: "home", label: t("home"), icon: Home },
         { id: "academics", label: t("academics"), icon: BookOpen },
@@ -3312,29 +3312,29 @@ const TopNav = ({ selectedTab, setSelectedTab, t, language, setLanguage }) => {
     ];
 
     return (
-        <nav className="w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
-            <div className="max-w-4xl mx-auto flex overflow-x-auto px-3 py-2 gap-2 justify-between items-center">
-                <div className="flex overflow-x-auto gap-2">
+        <nav className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg border-t border-gray-200 dark:border-gray-800 shadow-lg z-50">
+            <div className="max-w-4xl mx-auto px-2 py-2">
+                <div className="flex justify-around items-center">
                     {navItems.map((item) => (
                         <button
                             key={item.id}
                             onClick={() => setSelectedTab(item.id)}
-                            className={`flex items-center px-3 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                            className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all min-w-[60px] ${
                                 selectedTab === item.id
-                                    ? "bg-indigo-600 text-white shadow-sm"
-                                    : "bg-transparent text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                                    ? "text-indigo-600 dark:text-indigo-400"
+                                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
                             }`}
                         >
-                            <item.icon className="w-4 h-4 mr-1.5" />
-                            <span>{item.label}</span>
+                            <item.icon className={`w-6 h-6 mb-1 ${selectedTab === item.id ? 'scale-110' : ''} transition-transform`} />
+                            <span className="text-xs font-medium truncate max-w-[60px]">{item.label}</span>
                         </button>
                     ))}
                 </div>
                 
-                {/* 语言切换按钮 */}
+                {/* 语言切换按钮 - 放在右上角 */}
                 <button
                     onClick={() => setLanguage(language === 'en' ? 'zh' : 'en')}
-                    className="flex-shrink-0 px-3 py-2 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all whitespace-nowrap"
+                    className="absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
                     title={language === 'en' ? '切换到中文' : 'Switch to English'}
                 >
                     {language === 'en' ? '中' : 'EN'}
