@@ -2485,7 +2485,7 @@ const App = ({ onLogout }) => {
             
             {/* 模拟 Tab Bar */}
             <footer className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-gray-200/80 shadow-t-lg z-40">
-                <nav className="flex justify-around max-w-md mx-auto px-2 py-1.5">
+                <nav className="flex justify-around max-w-md mx-auto px-2 py-1.5 items-center">
                     <TabBarButton
                         icon={Home}
                         label={t('home')}
@@ -2516,6 +2516,16 @@ const App = ({ onLogout }) => {
                         isActive={activeTab === 'settings'}
                         onClick={() => setActiveTab('settings')}
                     />
+                    
+                    {/* 语言切换按钮 */}
+                    <button
+                        onClick={() => setLanguage(language === 'en' ? 'zh' : 'en')}
+                        className="flex flex-col items-center justify-center w-16 h-14 rounded-lg transition-all duration-200 text-gray-500 hover:text-violet-500"
+                        title={language === 'en' ? '切换到中文' : 'Switch to English'}
+                    >
+                        <span className="text-lg font-bold">{language === 'en' ? '中' : 'EN'}</span>
+                        <span className="text-xs font-semibold mt-0.5">{language === 'en' ? '中文' : 'English'}</span>
+                    </button>
                 </nav>
             </footer>
             

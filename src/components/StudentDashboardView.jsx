@@ -3296,6 +3296,8 @@ function MainApp({ onLogout }) {
                 selectedTab={selectedTab}
                 setSelectedTab={setSelectedTab}
                 t={t}
+                language={language}
+                setLanguage={setLanguage}
             />
 
             {/* 主内容区域 */}
@@ -3313,7 +3315,7 @@ function MainApp({ onLogout }) {
 
 // --- Top Navigation Component (顶部导航) ---
 
-const TopNav = ({ selectedTab, setSelectedTab, t }) => {
+const TopNav = ({ selectedTab, setSelectedTab, t, language, setLanguage }) => {
     const navItems = [
         { id: "home", label: t("home"), icon: Home },
         { id: "academics", label: t("academics"), icon: BookOpen },
@@ -3325,21 +3327,32 @@ const TopNav = ({ selectedTab, setSelectedTab, t }) => {
 
     return (
         <nav className="w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
-            <div className="max-w-4xl mx-auto flex overflow-x-auto px-3 py-2 gap-2">
-                {navItems.map((item) => (
-                    <button
-                        key={item.id}
-                        onClick={() => setSelectedTab(item.id)}
-                        className={`flex items-center px-3 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
-                            selectedTab === item.id
-                                ? "bg-indigo-600 text-white shadow-sm"
-                                : "bg-transparent text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                        }`}
-                    >
-                        <item.icon className="w-4 h-4 mr-1.5" />
-                        <span>{item.label}</span>
-                    </button>
-                ))}
+            <div className="max-w-4xl mx-auto flex overflow-x-auto px-3 py-2 gap-2 justify-between items-center">
+                <div className="flex overflow-x-auto gap-2">
+                    {navItems.map((item) => (
+                        <button
+                            key={item.id}
+                            onClick={() => setSelectedTab(item.id)}
+                            className={`flex items-center px-3 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                                selectedTab === item.id
+                                    ? "bg-indigo-600 text-white shadow-sm"
+                                    : "bg-transparent text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                            }`}
+                        >
+                            <item.icon className="w-4 h-4 mr-1.5" />
+                            <span>{item.label}</span>
+                        </button>
+                    ))}
+                </div>
+                
+                {/* 语言切换按钮 */}
+                <button
+                    onClick={() => setLanguage(language === 'en' ? 'zh' : 'en')}
+                    className="flex-shrink-0 px-3 py-2 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all whitespace-nowrap"
+                    title={language === 'en' ? '切换到中文' : 'Switch to English'}
+                >
+                    {language === 'en' ? '中' : 'EN'}
+                </button>
             </div>
         </nav>
     );
