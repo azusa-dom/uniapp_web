@@ -541,8 +541,6 @@ const PriorityChip = ({ priority, isSelected, onClick }) => {
 const AddScheduleModal = ({ t }) => {
     const { closeModal } = useApp();
     const { addSchedule } = useSchedule();
-    const { language } = useTranslation();
-    const isEn = language === 'en';
     
     const [courseName, setCourseName] = useState("");
     const [courseCode, setCourseCode] = useState("");
@@ -2443,8 +2441,6 @@ const ModernEventCard = ({ event }) => (
 
 const Health = ({ t }) => {
     const { openModal } = useApp();
-    const { language } = useTranslation();
-    const isEn = language === "en";
 
     return (
         <div className="space-y-6">
